@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S&P 500 Live Dashboard — תנודות + פריצות</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 50%, #0d2137 100%);
+    color: #e0e0e0; min-height: 100vh; padding: 16px;
+  }
+  .header { text-align: center; margin-bottom: 16px; }
+  .header h1 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+  .header .subtitle { font-size: 11px; opacity: 0.5; }
+  .status-bar { display: flex; justify-content: center; align-items: center; gap: 14px; margin: 10px 0; flex-wrap: wrap; }
+  .status-pill { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border-radius: 20px; padding: 5px 14px; font-size: 11px; }
+  .pulse { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
+  .pulse.live { background: #4caf50; } .pulse.closed { background: #f44336; } .pulse.pre { background: #ff9800; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .tabs { display: flex; gap: 6px; justify-content: center; margin: 16px 0; }
+  .tab-btn { background: rgba(255,255,255,0.06); border: none; color: #e0e0e0; padding: 9px 22px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+  .tab-btn.active { background: rgba(100,181,246,0.25); font-weight: 700; color: #fff; border: 1px solid rgba(100,181,246,0.4); }
+  .tab-btn:hover { background: rgba(255,255,255,0.12); }
+  .tab-content { display: none; } .tab-content.active { display: block; }
+  .summary-cards { display: flex; gap: 10px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
+  .summary-card { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 20px; text-align: center; min-width: 90px; }
+  .summary-card .emoji { font-size: 16px; } .summary-card .value { font-size: 18px; font-weight: 700; margin: 2px 0; } .summary-card .label { font-size: 9px; opacity: 0.5; }
+  .chart-container { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 14px; margin-bottom: 14px; overflow-x: auto; }
+  .chart-title { font-size: 12px; opacity: 0.6; text-align: center; margin-bottom: 8px; }
+  .bar-chart { display: flex; align-items: flex-end; justify-content: center; gap: 4px; height: 140px; padding: 0 8px; }
+  .bar-item { display: flex; flex-direction: column; align-items: center; width: 40px; }
+  .bar { width: 26px; border-radius: 4px 4px 0 0; transition: height 0.5s ease; min-height: 2px; }
+  .bar.positive { background: linear-gradient(to top, #2e7d32, #4caf50); }
+  .bar.negative { background: linear-gradient(to top, #c62828, #f44336); transform: scaleY(-1); border-radius: 0 0 4px 4px; }
+  .bar-label { font-size: 8px; opacity: 0.5; margin-top: 3px; transform: r
+  .bar { width: 26px; border-radius: 4px 4px 0 0; transition: height 0.5s ease; min-height: 2px; }
+  .bar.positive { background: linear-gradient(to top, #2e7d32, #4caf50); }
+  .bar.negative { background: linear-gradient(to top, #c62828, #f44336); transform: scaleY(-1); border-radius: 0 0 4px 4px; }
+  .bar-label { font-size: 8px; opacity: 0.5; margin-top: 3px; transform: rotate(-45deg); white-space: nowrap; }
+  .bar-value { font-size: 8px; opacity: 0.7; margin-bottom: 2px; font-weight: 600; }
+  .filters { display: flex; gap: 5px; justify-content: center; margin: 12px 0; flex-wrap: wrap; }
+  .filter-btn { background: rgba(255,255,255,0.06); border: none; color: #e0e0e0; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 11px; transition: all 0.2s; }
+  .filter-btn.active { background: rgba(255,255,255,0.2); font-weight: 700; color: #fff; }
+  .main-layout { display: flex; gap: 14px; }
+  .stock-list { flex: 2; min-width: 0; } .detail-panel { flex: 1; min-width: 270px; position: sticky; top: 16px; align-self: flex-start; }
+  .stock-row { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 3px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+  .stock-row:hover { background: rgba(255,255,255,0.08); }
+  .stock-row.selected { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+  .stock-row .ticker { font-weight: 700; font-size: 14px; width: 52px; color: #fff; }
+  .stock-row .name { flex: 1; font-size: 11px; opacity: 0.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .stock-row .sector-tag { font-size: 9px; opacity: 0.4; }
+  .stock-row .price { font-size: 13px; font-weight: 600; min-width: 65px; text-align: left; color: #fff; }
+  .stock-row .change { font-size: 12px; font-weight: 700; min-width: 70px; text-align: left; }
+  .stock-row .change.up { color: #69f0ae; } .stock-row .change.down { color: #ff5252; }
+  .signal-badge { padding: 3px 9px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap; color: #fff; }
+  .analyst-bar { display: flex; height: 5px; border-radius: 3px; overflow: hidden; width: 100%; margin-top: 2px; }
+  .detail-card { background: rgba(255,255,255,0.07); border-radius: 14px; padding: 20px; }
+  .detail-card .dt { font-size: 24px; font-weight: 800; text-align: center; color: #fff; }
+  .detail-card .dn { font-size: 12px; opacity: 0.6; text-align: center; margin-bottom: 12px; }
+  .detail-stats { display: flex; justify-content: space-around; margin-bottom: 16px; text-align: center; }
+  .detail-stats .val { font-size: 18px; font-weight: 700; } .detail-stats .lbl { font-size: 9px; opacity: 0.4; }
+  .rating-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+  .rating-row .rl { width: 60px; font-size: 9px; opacity: 0.6; text-align: left; }
+  .rating-row .rb { flex: 1; background: rgba(255,255,255,0.08); border-radius: 3px; height: 10px; overflow: hidden; }
+  .rating-row .rf { height: 100%; border-radius: 3px; transition: width 0.4s; }
+  .rating-row .rv { width: 26px; font-size: 10px; font-weight: 600; text-align: right; }
+  .insight-box { border-radius: 10px; padding: 10px; font-size: 10px; line-height: 1.7; text-align: center; margin-top: 12px; }
+  /* Breakout styles */
+  .breakout-section { margin-top: 8px; }
+  .breakout-card { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+  .breakout-card:hover { background: rgba(255,255,255,0.08); }
+  .breakout-card.selected { background: rgba(255,255,255,0.12); border-color: rgba(100,181,246,0.4); }
+  .breakout-status { padding: 3px 10px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .breakout-status.broke { background: #00c853; color: #fff; }
+  .breakout-status.near { background: #ff9800; color: #fff; }
+  .breakout-status.approaching { background: #2196f3; color: #fff; }
+  .proximity-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; position: relative; }
+  .proximity-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .proximity-marker { position: absolute; top: -2px; width: 2px; height: 12px; background: #fff; border-radius: 1px; }
+  .breakout-gauge { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+  .gauge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .gauge-label { width: 50px; font-size: 10px; opacity: 0.6; text-align: left; }
+  .gauge-bar { flex: 1; height: 18px; background: rgba(255,255,255,0.06); border-radius: 9px; overflow: hidden; position: relative; }
+  .gauge-fill { height: 100%; border-radius: 9px; display: flex; align-items: center; justify-content: flex-start; padding-right: 6px; font-size: 9px; font-weight: 700; }
+  .gauge-ticker { font-size: 11px; font-weight: 700; width: 50px; color: #fff; }
+  .disclaimer { margin-top: 18px; padding: 12px; background: rgba(255,152,0,0.08); border-radius: 10px; border: 1px solid rgba(255,152,0,0.2); font-size: 9px; opacity: 0.6; text-align: center; line-height: 1.7; }
+  .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,25,35,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 12px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #4caf50; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .update-flash { animation: flash 0.6s ease; }
+  @keyframes flash { 0% { background: rgba(76,175,80,0.2); } 100% { background: transparent; } }
+  @media (max-width: 768px) { .main-layout { flex-direction: column; } .detail-panel { position: static; } }
+</style>
+</head>
+<body>
+
+<div id="loading" class="loading-overlay">
+  <div class="spinner"></div>
+  <div style="font-size:14px;opacity:0.7">טוען נתוני שוק...</div>
+</div>
+
+<div class="header">
+  <h1>📊 S&P 500 — תנודות גדולות + מניות לפני פריצה</h1>
+  <div class="subtitle">נתונים חיים · דירוגי אנליסטים · ניתוח טכני · מתעדכן כל דקה</div>
+</div>
+
+<div class="status-bar">
+  <div class="status-pill"><div class="pulse" id="marketPulse"></div><span id="marketStatus"></span></div>
+  <div class="status-pill">🕐 <span id="lastUpdate">--</span></div>
+  <div class="status-pill">⏱️ עדכון הבא: <span id="nextUpdate">--</span></div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('movers')">📈 תנודות גדולות</button>
+  <button class="tab-btn" onclick="switchTab('breakout')">🚀 מניות לפני פריצה</button>
+</div>
+
+<!-- TAB 1: MOVERS -->
+<div class="tab-content active" id="tab-movers">
+  <div class="summary-cards" id="summaryCards"></div>
+  <div class="chart-container">
+    <div class="chart-title">שינוי באחוזים — כל 20 המניות (מתעדכן כל דקה)</div>
+    <div class="bar-chart" id="barChart"></div>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div class="main-layout">
+    <div class="stock-list" id="stockList"></div>
+    <div class="detail-panel" id="detailPanel" style="display:none"></div>
+  </div>
+</div>
+
+<!-- TAB 2: BREAKOUTS -->
+<div class="tab-content" id="tab-breakout">
+  <div class="summary-cards" id="breakoutSummary"></div>
+
+  <div class="breakout-gauge" id="breakoutGauge">
+    <div class="chart-title">קרבה ל-52 Week High — ככל שהבר מלא יותר, המניה קרובה יותר לפריצה</div>
+  </div>
+
+  <div class="filters" id="breakoutFilters"></div>
+
+  <div class="main-layout">
+    <div class="stock-list" id="breakoutList"></div>
+    <div class="detail-panel" id="breakoutDetail" style="display:none"></div>
+  </div>
+</div>
+
+<div class="disclaimer">
+  ⚠️ <strong>הבהרה חשובה:</strong> המידע המזצג הוא לצרכי מידע בלבד ואינו מהווה ייעוץ השקעות.
+  פריצה טכנית (Breakout) אינה ערובה לעליית מחיר. לפני כל החלטת השקעה, יש להתייעץ עם יועץ השקעות מוסמך.
+  המחירים עשויים להיות מעוכבים עד 15 דקות.
+</div>
+
+<script>
+// ===================== CONFIG =====================
+const MOVERS_TICKERS = [
+  "SBAC","LITE","CIEN","SATS","INTC","CCI","COHR","DASH","GLW","LYB",
+  "SWKS","VRSN","TSLA","GE","SWK","CCL","BIIB","GM","PKG","ARES","DVA","PPG","UAL","RCL"
+];
+
+// Breakout candidates: stocks at/near 52-week highs + strong momentum
+const BREAKOUT_TICKERS = [
+  "TJX","PFE","EQIX","ROST","SRE","CTVA","ETR","CASY",
+  "SBAC","CCI","DASH","COHR","LITE","VRSN","GLW"
+];
+
+const ALL_TICKERS = [...new Set([...MOVERS_TICKERS, ...BREAKOUT_TICKERS])];
+const REFRESH_INTERVAL = 60000;
+
+const analystData = {
+  SBAC:{rating:"Buy",analysts:17,strongBuy:24,buy:24,hold:53,sell:0,signal:"buy",sector:"REITs"},
+  LITE:{rating:"Buy",analysts:13,strongBuy:30,buy:40,hold:30,sell:0,signal:"buy",sector:"Technology"},
+  CIEN:{rating:"Buy",analysts:14,strongBuy:28,buy:36,hold:36,sell:0,signal:"buy",sector:"Technology"},
+  SATS:{rating:"Buy",analysts:5,strongBuy:40,buy:20,hold:40,sell:0,signal:"buy",sector:"Communications"},
+  INTC:{rating:"Hold",analysts:30,strongBuy:10,buy:16,hold:55,sell:19,signal:"hold",sector:"Semiconductors"},
+  CCI:{rating:"Buy",analysts:15,strongBuy:27,buy:47,hold:27,sell:0,signal:"buy",sector:"REITs"},
+  COHR:{rating:"Buy",analysts:13,strongBuy:31,buy:38,hold:31,sell:0,signal:"buy",sector:"Technology"},
+  DASH:{rating:"Strong Buy",analysts:33,strongBuy:45,buy:30,hold:25,sell:0,signal:"strongBuy",sector:"Consumer"},
+  GLW:{rating:"Buy",analysts:11,strongBuy:36,buy:36,hold:27,sell:0,signal:"buy",sector:"Technology"},
+  LYB:{rating:"Hold",analysts:16,strongBuy:10,buy:20,hold:55,sell:15,signal:"hold",sector:"Materials"},
+  SWKS:{rating:"Hold",analysts:15,strongBuy:10,buy:20,hold:55,sell:15,signal:"hold",sector:"Semiconductors"},
+  VRSN:{rating:"Buy",analysts:3,strongBuy:33,buy:34,hold:33,sell:0,signal:"buy",sector:"Technology"},
+  TSLA:{rating:"Hold",analysts:27,strongBuy:26,buy:22,hold:30,sell:22,signal:"hold",sector:"Automotive"},
+  GE:{rating:"Buy",analysts:19,strongBuy:32,buy:53,hold:11,sell:5,signal:"buy",sector:"Industrials"},
+  SWK:{rating:"Moderate Buy",analysts:10,strongBuy:15,buy:25,hold:50,sell:10,signal:"hold",sector:"Industrials"},
+  CCL:{rating:"Buy",analysts:16,strongBuy:30,buy:35,hold:30,sell:5,signal:"buy",sector:"Leisure"},
+  BIIB:{rating:"Buy",analysts:23,strongBuy:22,buy:35,hold:35,sell:8,signal:"buy",sector:"Healthcare"},
+  GM:{rating:"Buy",analysts:21,strongBuy:30,buy:38,hold:28,sell:4,signal:"buy",sector:"Automotive"},
+  PKG:{rating:"Buy",analysts:7,strongBuy:28,buy:44,hold:28,sell:0,signal:"buy",sector:"Materials"},
+  ARES:{rating:"Buy",analysts:14,strongBuy:28,buy:36,hold:36,sell:0,signal:"buy",sector:"Financials"},
+  DVA:{rating:"Hold",analysts:5,strongBuy:10,buy:20,hold:60,sell:10,signal:"hold",sector:"Healthcare"},
+  PPG:{rating:"Buy",analysts:12,strongBuy:25,buy:42,hold:25,sell:8,signal:"buy",sector:"Materials"},
+  UAL:{rating:"Strong Buy",analysts:16,strongBuy:40,buy:35,hold:20,sell:5,signal:"buy",sector:"Airlines"},
+  RCL:{rating:"Buy",analysts:18,strongBuy:33,buy:39,hold:22,sell:6,signal:"buy",sector:"Leisure"},
+  TJX:{rating:"Buy",analysts:15,strongBuy:33,buy:40,hold:27,sell:0,signal:"buy",sector:"Retail"},
+  PFE:{rating:"Buy",analysts:20,strongBuy:25,buy:35,hold:35,sell:5,signal:"buy",sector:"Pharma"},
+  EQIX:{rating:"Buy",analysts:16,strongBuy:31,buy:44,hold:25,sell:0,signal:"buy",sector:"Data Center REITs"},
+  ROST:{rating:"Buy",analysts:14,strongBuy:28,buy:43,hold:29,sell:0,signal:"buy",sector:"Retail"},
+  SRE:{rating:"Buy",analysts:12,strongBuy:25,buy:42,hold:33,sell:0,signal:"buy",sector:"Utilities"},
+  CTVA:{rating:"Buy",analysts:18,strongBuy:28,buy:39,hold:28,sell:5,signal:"buy",sector:"Agriculture"},
+  ETR:{rating:"Buy",analysts:10,strongBuy:30,buy:40,hold:30,sell:0,signal:"buy",sector:"Utilities"},
+  CASY:{rating:"Buy",analysts:8,strongBuy:37,buy:38,hold:25,sell:0,signal:"buy",sector:"Retail"},
+};
+
+const companyNames = {
+  SBAC:"SBA Communications",LITE:"Lumentum Holdings",CIEN:"Ciena Corp",SATS:"EchoStar Corp",
+  INTC:"Intel Corp",CCI:"Crown Castle",COHR:"Coherent Corp",DASH:"DoorDash",GLW:"Corning Inc",
+  LYB:"LyondellBasell",SWKS:"Skyworks Solutions",VRSN:"VeriSign",TSLA:"Tesla Inc",
+  GE:"GE Aerospace",SWK:"Stanley Black & Decker",CCL:"Carnival Corp",BIIB:"Biogen",
+  GM:"General Motors",PKG:"Packaging Corp",ARES:"Ares Management",DVA:"DaVita",
+  PPG:"PPG Industries",UAL:"United Airlines",RCL:"Royal Caribbean",
+  TJX:"TJX Companies",PFE:"Pfizer",EQIX:"Equinix",ROST:"Ross Stores",
+  SRE:"Sempra Energy",CTVA:"Corteva Agriscience",ETR:"Entergy Corp",CASY:"Casey's General Stores",
+};
+
+// ===================== STATE =====================
+let stocks = [];
+let breakoutStocks = [];
+let allQuotes = {};
+let selectedTicker = null;
+let selectedBreakout = null;
+let activeFilter = "all";
+let breakoutFilter = "all";
+let activeTab = "movers";
+let secondsUntilRefresh = 60;
+
+// ===================== MARKET HOURS =====================
+function getMarketState() {
+  const now = new Date();
+  const et = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  const h = et.getHours(), m = et.getMinutes(), day = et.getDay(), t = h*60+m;
+  if (day===0||day===6) return {state:"closed",label:"השוק סגור (סופ\"ש)",class:"closed"};
+  if (t>=240&&t<570) return {state:"pre",label:"לפני מסחר (Pre-Market)",class:"pre"};
+  if (t>=570&&t<960) return {state:"open",label:"🟢 השוק פתוח",class:"live"};
+  if (t>=960&&t<1200) return {state:"after",label:"אחרי מסחר (After-Hours)",class:"pre"};
+  return {state:"closed",label:"השוק סגור",class:"closed"};
+}
+function shouldAutoRefresh() { const ms=getMarketState(); return ms.state==="open"||ms.state==="pre"||ms.state==="after"; }
+
+// ===================== DATA FETCHING =====================
+async function fetchAllData() {
+  const symbols = ALL_TICKERS.join(",");
+  const fields = "regularMarketPrice,regularMarketChangePercent,regularMarketChange,regularMarketPreviousClose,preMarketPrice,preMarketChangePercent,fiftyTwoWeekHigh,fiftyTwoWeekLow,regularMarketVolume,averageDailyVolume3Month,shortName";
+  const endpoints = [
+    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=${fields}`,
+    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=${fields}`,
+  ];
+  for (const url of endpoints) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) continue;
+      const d = await r.json();
+      if (d.quoteResponse && d.quoteResponse.result) return d.quoteResponse.result;
+    } catch(e) { console.log("API fail:", e.message); }
+  }
+  try {
+    const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(endpoints[0])}`;
+    const r = await fetch(proxy);
+    if (r.ok) { const d = await r.json(); if (d.quoteResponse&&d.quoteResponse.result) return d.quoteResponse.result; }
+  } catch(e) { console.log("Proxy fail:", e.message); }
+  return null;
+}
+
+function processData(results) {
+  if (!results) return;
+  allQuotes = {};
+  for (const q of results) {
+    const t = q.symbol;
+    const ms = getMarketState();
+    let price = q.regularMarketPrice||0, change = q.regularMarketChangePercent||0;
+    if (ms.state==="pre"&&q.preMarketPrice) { price=q.preMarketPrice; change=q.preMarketChangePercent||0; }
+    allQuotes[t] = {
+      ticker: t, name: companyNames[t]||q.shortName||t, price, change,
+      type: change>=0?"gainer":"decliner",
+      high52: q.fiftyTwoWeekHigh||0, low52: q.fiftyTwoWeekLow||0,
+      volume: q.regularMarketVolume||0, avgVolume: q.averageDailyVolume3Month||0,
+      ...(analystData[t]||{sector:"Other",signal:"hold",rating:"N/A",analysts:0,strongBuy:0,buy:0,hold:100,sell:0}),
+    };
+  }
+
+  // Process movers
+  stocks = MOVERS_TICKERS.filter(t=>allQuotes[t]).map(t=>allQuotes[t])
+    .sort((a,b)=>Math.abs(b.change)-Math.abs(a.change)).slice(0,20);
+
+  // Process breakouts — calculate proximity to 52-week high
+  breakoutStocks = BREAKOUT_TICKERS.filter(t=>allQuotes[t]).map(t=>{
+    const q = allQuotes[t];
+    const range = q.high52 - q.low52;
+    const proximity = range > 0 ? ((q.price - q.low52) / range) * 100 : 0;
+    const distFromHigh = q.high52 > 0 ? ((q.high52 - q.price) / q.high52) * 100 : 0;
+    const volRatio = q.avgVolume > 0 ? q.volume / q.avgVolume : 1;
+
+    let breakoutStatus, statusClass, statusLabel;
+    if (distFromHigh <= 1) { breakoutStatus="broke"; statusClass="broke"; statusLabel="🔥 פרצה!"; }
+    else if (distFromHigh <= 5) { breakoutStatus="near"; statusClass="near"; statusLabel="⚡ לפני פריצה"; }
+    else { breakoutStatus="approaching"; statusClass="approaching"; statusLabel="📡 מתקרבת"; }
+
+    return { ...q, proximity, distFromHigh, volRatio, breakoutStatus, statusClass, statusLabel };
+  }).sort((a,b) => a.distFromHigh - b.distFromHigh);
+}
+
+// ===================== FALLBACK DATA =====================
+function loadFallback() {
+  const fb = {
+    SBAC:{p:204.04,c:18.93,h:210,l:130}, LITE:{p:826.88,c:8.14,h:850,l:500}, CIEN:{p:447.76,c:7.79,h:460,l:280},
+    SATS:{p:128.68,c:6.70,h:135,l:60}, INTC:{p:50.38,c:4.89,h:55,l:28}, CCI:{p:84.78,c:4.89,h:88,l:60},
+    COHR:{p:258.16,c:4.18,h:270,l:120}, DASH:{p:156.45,c:3.95,h:165,l:95}, GLW:{p:147.92,c:3.89,h:155,l:90},
+    LYB:{p:79.60,c:3.77,h:95,l:65}, SWKS:{p:55.19,c:3.70,h:68,l:42}, VRSN:{p:259.85,c:3.62,h:268,l:180},
+    TSLA:{p:360.59,c:-5.42,h:490,l:220}, GE:{p:281.16,c:-3.94,h:340,l:195}, SWK:{p:68.64,c:-3.56,h:92,l:60},
+    CCL:{p:25.64,c:-3.54,h:32,l:16}, BIIB:{p:177.34,c:-3.50,h:225,l:140}, GM:{p:72.54,c:-3.33,h:88,l:48},
+    PKG:{p:204.46,c:-3.22,h:238,l:170}, ARES:{p:102.43,c:-3.19,h:128,l:78}, DVA:{p:145.58,c:-3.17,h:172,l:108},
+    PPG:{p:103.24,c:-3.03,h:132,l:95}, UAL:{p:92.21,c:-3.02,h:118,l:58}, RCL:{p:273.59,c:-3.00,h:310,l:180},
+    TJX:{p:146.50,c:1.50,h:148,l:109}, PFE:{p:29.80,c:1.70,h:30.20,l:24.80},
+    EQIX:{p:948.00,c:1.60,h:960,l:758}, ROST:{p:171.50,c:1.50,h:173,l:99},
+    SRE:{p:96.80,c:0.20,h:97.50,l:69}, CTVA:{p:72.10,c:0.10,h:72.80,l:53.60},
+    ETR:{p:90.50,c:1.10,h:91.80,l:67}, CASY:{p:746.00,c:2.10,h:747,l:380},
+  };
+  allQuotes = {};
+  for (const [t,d] of Object.entries(fb)) {
+    allQuotes[t] = {
+      ticker:t, name:companyNames[t]||t, price:d.p, change:d.c,
+      type:d.c>=0?"gainer":"decliner", high52:d.h, low52:d.l, volume:0, avgVolume:0,
+      ...(analystData[t]||{sector:"Other",signal:"hold",rating:"N/A",analysts:0,strongBuy:0,buy:0,hold:100,sell:0}),
+    };
+  }
+  stocks = MOVERS_TICKERS.filter(t=>allQuotes[t]).map(t=>allQuotes[t])
+    .sort((a,b)=>Math.abs(b.change)-Math.abs(a.change)).slice(0,20);
+  breakoutStocks = BREAKOUT_TICKERS.filter(t=>allQuotes[t]).map(t=>{
+    const q=allQuotes[t]; const range=q.high52-q.low52;
+    const proximity=range>0?((q.price-q.low52)/range)*100:0;
+    const distFromHigh=q.high52>0?((q.high52-q.price)/q.high52)*100:0;
+    let breakoutStatus,statusClass,statusLabel;
+    if(distFromHigh<=1){breakoutStatus="broke";statusClass="broke";statusLabel="🔥 פרצה!";}
+    else if(distFromHigh<=5){breakoutStatus="near";statusClass="near";statusLabel="⚡ לפני פריצה";}
+    else{breakoutStatus="approaching";statusClass="approaching";statusLabel="📡 מתקרבת";}
+    return {...q,proximity,distFromHigh,volRatio:1,breakoutStatus,statusClass,statusLabel};
+  }).sort((a,b)=>a.distFromHigh-b.distFromHigh);
+}
+
+// ===================== RENDERING: TABS =====================
+const signalColors = {strongBuy:"#00c853",buy:"#4caf50",hold:"#ff9800",sell:"#f44336"};
+const signalLabels = {strongBuy:"קנייה חזקה",buy:"קנייה",hold:"החזקה",sell:"מכירה"};
+const signalEmoji = {strongBuy:"🟢🟢",buy:"🟢",hold:"🟡",sell:"🔴"};
+
+window.switchTab = function(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='movers')||(i===1&&tab==='breakout')));
+  document.getElementById('tab-movers').classList.toggle('active', tab==='movers');
+  document.getElementById('tab-breakout').classList.toggle('active', tab==='breakout');
+};
+
+// ===================== RENDERING: MOVERS (same as before) =====================
+function renderMovers() {
+  // Summary
+  const gainers=stocks.filter(s=>s.change>0).length, decliners=stocks.filter(s=>s.change<0).length;
+  const buySignals=stocks.filter(s=>s.signal==="buy"||s.signal==="strongBuy").length;
+  const topM=stocks.reduce((a,b)=>Math.abs(a.change)>Math.abs(b.change)?a:b,stocks[0]);
+  document.getElementById("summaryCards").innerHTML=[
+    {e:"📈",v:gainers,l:"עולות",c:"#69f0ae"},{e:"📉",v:decliners,l:"יורדות",c:"#ff5252"},
+    {e:"🟢",v:buySignals,l:"אות קנייה",c:"#4caf50"},{e:"🔥",v:topM?topM.ticker:"--",l:"התנודה הגדולה",c:"#ffd740"},
+  ].map(c=>`<div class="summary-card"><div class="emoji">${c.e}</div><div class="value" style="color:${c.c}">${c.v}</div><div class="label">${c.l}</div></div>`).join("");
+
+  // Chart
+  const sorted=[...stocks].sort((a,b)=>b.change-a.change);
+  const maxAbs=Math.max(...sorted.map(s=>Math.abs(s.change)),1);
+  document.getElementById("barChart").innerHTML=sorted.map(s=>{
+    const h=Math.max((Math.abs(s.change)/maxAbs)*120,4), cls=s.change>=0?"positive":"negative";
+    return `<div class="bar-item"><div class="bar-value" style="color:${s.change>=0?'#69f0ae':'#ff5252'}">${s.change>=0?'+':''}${s.change.toFixed(1)}%</div><div class="bar ${cls}" style="height:${h}px"></div><div class="bar-label">${s.ticker}</div></div>`;
+  }).join("");
+
+  // Filters
+  const fs=[{k:"all",l:"🔄 הכל"},{k:"gainers",l:"📈 עולות"},{k:"decliners",l:"📉 יורדות"},{k:"buySignal",l:"🟢 אות קנייה"}];
+  document.getElementById("filters").innerHTML=fs.map(f=>`<button class="filter-btn ${activeFilter===f.k?'active':''}" onclick="setFilter('${f.k}')">${f.l}</button>`).join("");
+
+  // List
+  let filtered=[...stocks];
+  if(activeFilter==="gainers")filtered=filtered.filter(s=>s.change>0);
+  else if(activeFilter==="decliners")filtered=filtered.filter(s=>s.change<0);
+  else if(activeFilter==="buySignal")filtered=filtered.filter(s=>s.signal==="buy"||s.signal==="strongBuy");
+  filtered.sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
+
+  document.getElementById("stockList").innerHTML=filtered.map(s=>{
+    const chC=s.change>=0?"up":"down",ar=s.change>=0?"▲":"▼",sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡",sel=selectedTicker===s.ticker?"selected":"";
+    const bar=[{p:s.strongBuy,c:"#00c853"},{p:s.buy,c:"#4caf50"},{p:s.hold,c:"#ff9800"},{p:s.sell,c:"#f44336"}].filter(x=>x.p>0).map(x=>`<div style="width:${x.p}%;background:${x.c}"></div>`).join("");
+    return `<div class="stock-row ${sel}" onclick="selectStock('${s.ticker}')"><div><div class="ticker">${s.ticker}</div><div class="sector-tag">${s.sector}</div></div><div class="name" style="flex:1">${s.name}<div class="analyst-bar">${bar}</div></div><div class="price">$${s.price.toFixed(2)}</div><div class="change ${chC}">${ar} ${Math.abs(s.change).toFixed(2)}%</div><span class="signal-badge" style="background:${sc}">${se} ${sl}</span></div>`;
+  }).join("");
+
+  renderMoversDetail();
+}
+
+function renderMoversDetail() {
+  const panel=document.getElementById("detailPanel");
+  if(!selectedTicker){panel.style.display="none";return;}
+  const s=stocks.find(x=>x.ticker===selectedTicker);
+  if(!s){panel.style.display="none";return;}
+  panel.style.display="block";
+  const chC=s.change>=0?"#69f0ae":"#ff5252",sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡";
+  const rats=[{l:"קנייה חזקה",v:s.strongBuy,c:"#00c853"},{l:"קנייה",v:s.buy,c:"#4caf50"},{l:"החזקה",v:s.hold,c:"#ff9800"},{l:"מכירה",v:s.sell,c:"#f44336"}];
+  let ib,it;
+  if(s.signal==="strongBuy"){ib="rgba(76,175,80,0.15)";it="✅ רוב האנליסטים ממליצים על קנייה חזקה.";}
+  else if(s.signal==="buy"){ib="rgba(76,175,80,0.12)";it="🟢 רוב האנליסטים ממליצים על קנייה.";}
+  else if(s.signal==="hold"){ib="rgba(255,152,0,0.12)";it="🟡 הדעות חלוקות. מומלץ לבחון לעומק.";}
+  else{ib="rgba(244,67,54,0.12)";it="🔴 רוב האנליסטים ממליצים למכור.";}
+  panel.innerHTML=`<div class="detail-card"><div class="dt">${s.ticker}</div><div class="dn">${s.name} · ${s.sector}</div><div class="detail-stats"><div><div class="val" style="color:#fff">$${s.price.toFixed(2)}</div><div class="lbl">מחיר</div></div><div><div class="val" style="color:${chC}">${s.change>=0?'+':''}${s.change.toFixed(2)}%</div><div class="lbl">שינוי</div></div></div><div style="text-align:center;margin-bottom:12px"><span class="signal-badge" style="background:${sc};padding:5px 14px;font-size:12px">${se} ${sl}</span><div style="font-size:9px;opacity:0.4;margin-top:4px">${s.analysts} אנליסטים</div></div><div style="margin-bottom:12px"><div style="font-size:10px;opacity:0.5;text-align:center;margin-bottom:6px">פילוח דירוגי אנליסטים</div>${rats.map(r=>`<div class="rating-row"><div class="rl">${r.l}</div><div class="rb"><div class="rf" style="width:${r.v}%;background:${r.c}"></div></div><div class="rv">${r.v}%</div></div>`).join("")}</div><div class="insight-box" style="background:${ib}">${it}</div></div>`;
+}
+
+// ===================== RENDERING: BREAKOUTS =====================
+function renderBreakouts() {
+  const broke=breakoutStocks.filter(s=>s.breakoutStatus==="broke").length;
+  const near=breakoutStocks.filter(s=>s.breakoutStatus==="near").length;
+  const approaching=breakoutStocks.filter(s=>s.breakoutStatus==="approaching").length;
+
+  document.getElementById("breakoutSummary").innerHTML=[
+    {e:"🔥",v:broke,l:"פרצו!",c:"#00c853"},{e:"⚡",v:near,l:"לפני פריצה",c:"#ff9800"},
+    {e:"📡",v:approaching,l:"מתקרבות",c:"#2196f3"},{e:"📊",v:breakoutStocks.length,l:"במעקב",c:"#64b5f6"},
+  ].map(c=>`<div class="summary-card"><div class="emoji">${c.e}</div><div class="value" style="color:${c.c}">${c.v}</div><div class="label">${c.l}</div></div>`).join("");
+
+  // Gauge chart
+  const gaugeHtml = breakoutStocks.slice(0,15).map(s=>{
+    const pct = Math.min(s.proximity, 100);
+    let col = s.breakoutStatus==="broke"?"#00c853":s.breakoutStatus==="near"?"#ff9800":"#2196f3";
+    return `<div class="gauge-row"><div class="gauge-ticker">${s.ticker}</div><div class="gauge-bar"><div class="gauge-fill" style="width:${pct}%;background:${col};">${s.distFromHigh.toFixed(1)}%</div></div><span class="breakout-status ${s.statusClass}" style="font-size:9px">${s.statusLabel}</span></div>`;
+  }).join("");
+  document.getElementById("breakoutGauge").innerHTML=`<div class="chart-title">קרבה ל-52 Week High — מרחק מהשיג באחוזים (ככל שקטן יותר = קרוב יותר לפריצה)</div>${gaugeHtml}`;
+
+  // Filters
+  const bfs=[{k:"all",l:"🔄 הכל"},{k:"broke",l:"🔥 פרצו"},{k:"near",l:"⚡ לפני פריצה"},{k:"approaching",l:"📡 מתקרבות"}];
+  document.getElementById("breakoutFilters").innerHTML=bfs.map(f=>`<button class="filter-btn ${breakoutFilter===f.k?'active':''}" onclick="setBreakoutFilter('${f.k}')">${f.l}</button>`).join("");
+
+  // List
+  let filtered=[...breakoutStocks];
+  if(breakoutFilter!=="all")filtered=filtered.filter(s=>s.breakoutStatus===breakoutFilter);
+
+  document.getElementById("breakoutList").innerHTML=filtered.map(s=>{
+    const chC=s.change>=0?"up":"down",ar=s.change>=0?"▲":"▼",sel=selectedBreakout===s.ticker?"selected":"";
+    return `<div class="stock-row ${sel}" onclick="selectBreakout('${s.ticker}')"><div><div class="ticker">${s.ticker}</div><div class="sector-tag">${s.sector}</div></div><div class="name" style="flex:1">${s.name}<div class="proximity-bar"><div class="proximity-fill" style="width:${Math.min(s.proximity,100)}%;background:${s.statusClass==='broke'?'#00c853':s.statusClass==='near'?'#ff9800':'#2196f3'}"></div></div></div><div class="price">$${s.price.toFixed(2)}</div><div class="change ${chC}">${ar} ${Math.abs(s.change).toFixed(2)}%</div><span class="breakout-status ${s.statusClass}">${s.statusLabel}</span></div>`;
+  }).join("");
+
+  renderBreakoutDetail();
+}
+
+function renderBreakoutDetail() {
+  const panel=document.getElementById("breakoutDetail");
+  if(!selectedBreakout){panel.style.display="none";return;}
+  const s=breakoutStocks.find(x=>x.ticker===selectedBreakout);
+  if(!s){panel.style.display="none";return;}
+  panel.style.display="block";
+
+  const chC=s.change>=0?"#69f0ae":"#ff5252";
+  const sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡";
+  const rats=[{l:"קנייה חזקה",v:s.strongBuy,c:"#00c853"},{l:"קנייה",v:s.buy,c:"#4caf50"},{l:"החזקה",v:s.hold,c:"#ff9800"},{l:"מכירה",v:s.sell,c:"#f44336"}];
+
+  let breakoutInsight = "";
+  if(s.breakoutStatus==="broke") breakoutInsight=`<div class="insight-box" style="background:rgba(0,200,83,0.15)">🔥 <strong>המניה פרצה את שיא ה-52 שבועות!</strong><br>המחיר נמצא במרחק של ${s.distFromHigh.toFixed(2)}% מהשיא ($${s.high52.toFixed(2)}).<br>פריצה כזו מלווה לעתים קרובות בהמשך מומנטום חיובי.</div>`;
+  else if(s.breakoutStatus==="near") breakoutInsight=`<div class="insight-box" style="background:rgba(255,152,0,0.15)">⚡ <strong>לפני פריצה — ${s.distFromHigh.toFixed(2)}% מתחת לשיא</strong><br>שיא 52 שבועות: $${s.high52.toFixed(2)}<br>המניה מתקרבת לרמת ההתנגדות. פריצה מעל השיא עשויה ליצור מומנטום.</div>`;
+  else breakoutInsight=`<div class="insight-box" style="background:rgba(33,150,243,0.15)">📡 <strong>מתקרבת — ${s.distFromHigh.toFixed(2)}% מתחת לשיא</strong><br>שיא 52 שבועות: $${s.high52.toFixed(2)} | שפל: $${s.low52.toFixed(2)}<br>המניה במגמת עלייה אבל עדיין לא קרובה מספיק לפריצה.</div>`;
+
+  panel.innerHTML=`<div class="detail-card"><div class="dt">${s.ticker}</div><div class="dn">${s.name} · ${s.sector}</div><div class="detail-stats"><div><div class="val" style="color:#fff">$${s.price.toFixed(2)}</div><div class="lbl">מחיר נוכחי</div></div><div><div class="val" style="color:${chC}">${s.change>=0?'+':''}${s.change.toFixed(2)}%</div><div class="lbl">שינוי יומי</div></div></div>
+  <div style="text-align:center;margin-bottom:12px"><span class="breakout-status ${s.statusClass}" style="padding:5px 16px;font-size:13px">${s.statusLabel}</span></div>
+  <div style="margin-bottom:12px"><div style="font-size:10px;opacity:0.5;text-align:center;margin-bottom:6px">ציקום במסלול שנתי</div><div style="display:flex;justify-content:space-between;font-size:9px;opacity:0.5;margin-bottom:3px"><span>שפל $${s.low52.toFixed(2)}</span><span>שיא $${s.high52.toFixed(2)}</span></div><div class="proximity-bar" style="height:14px"><div class="proximity-fill" style="width:${Math.min(s.proximity,100)}%;background:linear-gradient(90deg,#2196f3,${s.breakoutStatus==='broke'?'#00c853':'#ff9800'})"></div></div></div>
+  <div style="text-align:center;margin-bottom:12px"><span class="signal-badge" style="background:${sc};padding:4px 12px;font-size:11px">${se} ${sl}</span><div style="font-size:9px;opacity:0.4;margin-top:3px">${s.analysts} אנליסטים</div></div>
+  <div style="margin-bottom:10px">${rats.map(r=>`<div class="rating-row"><div class="rl">${r.l}</div><div class="rb"><div class="rf" style="width:${r.v}%;background:${r.c}"></div></div><div class="rv">${r.v}%</div></div>`).join("")}</div>
+  ${breakoutInsight}</div>`;
+}
+
+// ===================== INTERACTIONS =====================
+window.selectStock = function(t) { selectedTicker=selectedTicker===t?null:t; renderMovers(); };
+window.selectBreakout = function(t) { selectedBreakout=selectedBreakout===t?null:t; renderBreakouts(); };
+window.setFilter = function(f) { activeFilter=f; renderMovers(); };
+window.setBreakoutFilter = function(f) { breakoutFilter=f; renderBreakouts(); };
+
+// ===================== STATUS =====================
+function updateMarketStatus() {
+  const ms=getMarketState();
+  document.getElementById("marketPulse").className=`pulse ${ms.class}`;
+  document.getElementById("marketStatus").textContent=ms.label;
+}
+function updateTimers() {
+  document.getElementById("lastUpdate").textContent=new Date().toLocaleTimeString("he-IL");
+  if(shouldAutoRefresh()){secondsUntilRefresh--;if(secondsUntilRefresh<0)secondsUntilRefresh=60;document.getElementById("nextUpdate").textContent=`${secondsUntilRefresh} שניות`;}
+  else{document.getElementById("nextUpdate").textContent="מושהה (השוק סגור)";}
+}
+
+function renderAll() { renderMovers(); renderBreakouts(); updateMarketStatus(); }
+
+// ===================== MAIN =====================
+async function refreshData() {
+  try {
+    const r=await fetchAllData();
+    if(r){processData(r);renderAll();
+      document.querySelectorAll('.stock-row').forEach(el=>{el.classList.add('update-flash');setTimeout(()=>el.classList.remove('update-flash'),600);});
+    }
+  } catch(e){console.error("Refresh failed:",e);}
+  secondsUntilRefresh=60;
+}
+
+async function init() {
+  const r=await fetchAllData();
+  if(r){processData(r);} else{console.log("Using fallback data");loadFallback();}
+  document.getElementById("loading").style.display="none";
+  renderAll();
+  setInterval(()=>{if(shouldAutoRefresh())refreshData();},REFRESH_INTERVAL);
+  setInterval(updateTimers,1000);
+  updateTimers();
+}
+
+init();
+</script>
+</body>
+</html>
