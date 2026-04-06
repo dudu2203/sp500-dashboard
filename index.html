@@ -20,6 +20,7 @@
   .pulse { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
   .pulse.live { background: #4caf50; } .pulse.closed { background: #f44336; } .pulse.pre { background: #ff9800; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .data-source-pill { font-size: 9px; opacity: 0.5; }
   .tabs { display: flex; gap: 6px; justify-content: center; margin: 16px 0; flex-wrap: wrap; }
   .tab-btn { background: rgba(255,255,255,0.06); border: none; color: #e0e0e0; padding: 9px 22px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
   .tab-btn.active { background: rgba(100,181,246,0.25); font-weight: 700; color: #fff; border: 1px solid rgba(100,181,246,0.4); }
@@ -40,11 +41,12 @@
   .filters { display: flex; gap: 5px; justify-content: center; margin: 12px 0; flex-wrap: wrap; }
   .filter-btn { background: rgba(255,255,255,0.06); border: none; color: #e0e0e0; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 11px; transition: all 0.2s; }
   .filter-btn.active { background: rgba(255,255,255,0.2); font-weight: 700; color: #fff; }
-  .main-layout { display: flex; gap: 14px; }
-  .stock-list { flex: 2; min-width: 0; } .detail-panel { flex: 1; min-width: 270px; position: sticky; top: 16px; align-self: flex-start; max-height: 90vh; overflow-y: auto; }
+
+  /* Stock rows */
+  .stock-list { max-width: 900px; margin: 0 auto; }
   .stock-row { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 3px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
   .stock-row:hover { background: rgba(255,255,255,0.08); }
-  .stock-row.selected { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+  .stock-row.selected { background: rgba(255,255,255,0.12); border-color: rgba(100,181,246,0.4); border-radius: 10px 10px 0 0; margin-bottom: 0; }
   .stock-row .ticker { font-weight: 700; font-size: 14px; width: 52px; color: #fff; }
   .stock-row .name { flex: 1; font-size: 11px; opacity: 0.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .stock-row .sector-tag { font-size: 9px; opacity: 0.4; }
@@ -53,35 +55,65 @@
   .stock-row .change.up { color: #69f0ae; } .stock-row .change.down { color: #ff5252; }
   .signal-badge { padding: 3px 9px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap; color: #fff; }
   .analyst-bar { display: flex; height: 5px; border-radius: 3px; overflow: hidden; width: 100%; margin-top: 2px; }
-  .detail-card { background: rgba(255,255,255,0.07); border-radius: 14px; padding: 20px; }
-  .detail-card .dt { font-size: 24px; font-weight: 800; text-align: center; color: #fff; }
-  .detail-card .dn { font-size: 12px; opacity: 0.6; text-align: center; margin-bottom: 12px; }
-  .detail-stats { display: flex; justify-content: space-around; margin-bottom: 16px; text-align: center; }
-  .detail-stats .val { font-size: 18px; font-weight: 700; } .detail-stats .lbl { font-size: 9px; opacity: 0.4; }
+
+  /* Inline detail (accordion) */
+  .inline-detail { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.25s ease; opacity: 0; margin-bottom: 3px; }
+  .inline-detail.open { max-height: 800px; opacity: 1; }
+  .inline-detail-inner { background: rgba(255,255,255,0.07); border-radius: 0 0 14px 14px; border: 2px solid rgba(100,181,246,0.4); border-top: 1px solid rgba(100,181,246,0.2); padding: 16px; }
+
+  .detail-stats { display: flex; justify-content: space-around; margin-bottom: 12px; text-align: center; flex-wrap: wrap; gap: 8px; }
+  .detail-stats .stat { min-width: 70px; }
+  .detail-stats .val { font-size: 16px; font-weight: 700; } .detail-stats .lbl { font-size: 9px; opacity: 0.4; }
   .rating-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
   .rating-row .rl { width: 60px; font-size: 9px; opacity: 0.6; text-align: left; }
   .rating-row .rb { flex: 1; background: rgba(255,255,255,0.08); border-radius: 3px; height: 10px; overflow: hidden; }
   .rating-row .rf { height: 100%; border-radius: 3px; transition: width 0.4s; }
   .rating-row .rv { width: 26px; font-size: 10px; font-weight: 600; text-align: right; }
-  .insight-box { border-radius: 10px; padding: 10px; font-size: 10px; line-height: 1.7; text-align: center; margin-top: 12px; }
+  .insight-box { border-radius: 10px; padding: 10px; font-size: 10px; line-height: 1.7; text-align: center; margin-top: 10px; }
+  .market-data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 6px; margin-bottom: 10px; }
+  .market-data-item { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 6px; text-align: center; }
+  .market-data-item .value { font-size: 12px; font-weight: 700; color: #fff; }
+  .market-data-item .label { font-size: 8px; opacity: 0.5; margin-top: 2px; }
+
   /* Breakout styles */
-  .breakout-section { margin-top: 8px; }
-  .breakout-card { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.04); border-radius: 10px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
-  .breakout-card:hover { background: rgba(255,255,255,0.08); }
-  .breakout-card.selected { background: rgba(255,255,255,0.12); border-color: rgba(100,181,246,0.4); }
-  .breakout-status { padding: 3px 10px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap; }
-  .breakout-status.broke { background: #00c853; color: #fff; }
-  .breakout-status.near { background: #ff9800; color: #fff; }
-  .breakout-status.approaching { background: #2196f3; color: #fff; }
-  .proximity-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; position: relative; }
-  .proximity-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
-  .proximity-marker { position: absolute; top: -2px; width: 2px; height: 12px; background: #fff; border-radius: 1px; }
   .breakout-gauge { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
   .gauge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .gauge-label { width: 50px; font-size: 10px; opacity: 0.6; text-align: left; }
   .gauge-bar { flex: 1; height: 18px; background: rgba(255,255,255,0.06); border-radius: 9px; overflow: hidden; position: relative; }
   .gauge-fill { height: 100%; border-radius: 9px; display: flex; align-items: center; justify-content: flex-start; padding-right: 6px; font-size: 9px; font-weight: 700; }
   .gauge-ticker { font-size: 11px; font-weight: 700; width: 50px; color: #fff; }
+  .breakout-status { padding: 3px 10px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .breakout-status.broke { background: #00c853; color: #fff; }
+  .breakout-status.near { background: #ff9800; color: #fff; }
+  .breakout-status.approaching { background: #2196f3; color: #fff; }
+  .proximity-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+  .proximity-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+  .breakout-point-section { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+  .breakout-point-title { font-size: 10px; font-weight: 700; opacity: 0.7; margin-bottom: 6px; text-align: center; }
+  .breakout-point-info { font-size: 12px; color: #fff; font-weight: 600; text-align: center; margin-bottom: 6px; }
+  .breakout-distance-bar { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; position: relative; margin-bottom: 4px; }
+  .breakout-distance-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #2196f3, #00c853); }
+  .breakout-distance-text { font-size: 9px; opacity: 0.6; text-align: center; }
+
+  /* Opportunity styles */
+  .opportunity-card { display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 3px; cursor: pointer; transition: all 0.2s; border: 2px solid rgba(255,255,255,0.1); }
+  .opportunity-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(100,181,246,0.3); }
+  .opportunity-card.selected { background: rgba(100,181,246,0.15); border-color: rgba(100,181,246,0.5); border-radius: 10px 10px 0 0; margin-bottom: 0; }
+  .opportunity-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .opportunity-ticker { font-weight: 700; font-size: 14px; color: #fff; width: 50px; }
+  .opportunity-name { flex: 1; font-size: 10px; opacity: 0.7; }
+  .vol-spike-badge { background: rgba(255, 193, 7, 0.2); color: #ffc107; padding: 3px 8px; border-radius: 8px; font-size: 9px; font-weight: 700; }
+  .opp-time-badge { background: rgba(33, 150, 243, 0.2); color: #64b5f6; padding: 3px 8px; border-radius: 8px; font-size: 9px; font-weight: 700; }
+  .opp-direction-long { background: rgba(76, 175, 80, 0.2); color: #69f0ae; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; }
+  .opp-direction-short { background: rgba(244, 67, 54, 0.2); color: #ff5252; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; }
+
+  /* Analyst updates */
+  .analyst-update-card { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 8px; margin-bottom: 6px; border-right: 3px solid #64b5f6; }
+  .analyst-update-card .analyst-name { font-size: 10px; font-weight: 600; color: #fff; }
+  .analyst-update-card .analyst-action { font-size: 9px; opacity: 0.7; margin: 2px 0; }
+  .analyst-update-card .analyst-target { font-size: 10px; font-weight: 600; color: #4caf50; }
+
   .disclaimer { margin-top: 18px; padding: 12px; background: rgba(255,152,0,0.08); border-radius: 10px; border: 1px solid rgba(255,152,0,0.2); font-size: 9px; opacity: 0.6; text-align: center; line-height: 1.7; }
   .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,25,35,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 12px; }
   .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #4caf50; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -89,81 +121,12 @@
   .update-flash { animation: flash 0.6s ease; }
   @keyframes flash { 0% { background: rgba(76,175,80,0.2); } 100% { background: transparent; } }
 
-  /* Market data grid */
-  .market-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .market-data-item { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 8px; text-align: center; }
-  .market-data-item .value { font-size: 13px; font-weight: 700; color: #fff; }
-  .market-data-item .label { font-size: 8px; opacity: 0.5; margin-top: 2px; }
-
-  /* Breakout point section */
-  .breakout-point-section { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; margin-bottom: 12px; }
-  .breakout-point-title { font-size: 10px; font-weight: 700; opacity: 0.7; margin-bottom: 6px; text-align: center; }
-  .breakout-point-info { font-size: 12px; color: #fff; font-weight: 600; text-align: center; margin-bottom: 6px; }
-  .breakout-distance-bar { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; position: relative; margin-bottom: 4px; }
-  .breakout-distance-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #2196f3, #00c853); display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; }
-  .breakout-distance-marker { position: absolute; right: 0; top: -2px; width: 2px; height: 16px; background: #fff; border-radius: 1px; }
-  .breakout-distance-text { font-size: 9px; opacity: 0.6; text-align: center; }
-
-  /* Analyst updates section */
-  .analyst-updates-section { margin-top: 12px; }
-  .analyst-updates-title { font-size: 10px; font-weight: 700; opacity: 0.7; margin-bottom: 8px; text-align: center; }
-  .analyst-update-card { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 8px; margin-bottom: 6px; border-left: 3px solid #64b5f6; }
-  .analyst-update-card .analyst-name { font-size: 10px; font-weight: 600; color: #fff; }
-  .analyst-update-card .analyst-action { font-size: 9px; opacity: 0.7; margin: 2px 0; }
-  .analyst-update-card .analyst-target { font-size: 10px; font-weight: 600; color: #4caf50; }
-  .analyst-update-card .analyst-date { font-size: 8px; opacity: 0.5; }
-
-  /* Opportunity styles */
-  .opportunity-card { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 6px; cursor: pointer; transition: all 0.2s; border: 2px solid rgba(255,255,255,0.1); }
-  .opportunity-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(100,181,246,0.3); }
-  .opportunity-card.selected { background: rgba(100,181,246,0.15); border-color: rgba(100,181,246,0.5); }
-  .opportunity-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .opportunity-ticker { font-weight: 700; font-size: 14px; color: #fff; width: 50px; }
-  .opportunity-name { flex: 1; font-size: 10px; opacity: 0.7; }
-  .vol-spike-badge { background: rgba(255, 193, 7, 0.2); color: #ffc107; padding: 3px 8px; border-radius: 8px; font-size: 9px; font-weight: 700; white-space: nowrap; }
-  .opp-time-badge { background: rgba(33, 150, 243, 0.2); color: #64b5f6; padding: 3px 8px; border-radius: 8px; font-size: 9px; font-weight: 700; white-space: nowrap; }
-  .opp-direction-long { background: rgba(76, 175, 80, 0.2); color: #69f0ae; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; }
-  .opp-direction-short { background: rgba(244, 67, 54, 0.2); color: #ff5252; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; }
-  .opportunity-amount { color: #ffd740; font-size: 12px; font-weight: 700; }
-  .opp-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
-  .opp-detail-item { background: rgba(255,255,255,0.03); border-radius: 6px; padding: 6px; text-align: center; }
-  .opp-detail-item .label { font-size: 8px; opacity: 0.5; }
-  .opp-detail-item .value { font-size: 11px; font-weight: 700; color: #fff; margin-top: 2px; }
-
   @media (max-width: 768px) {
-    .main-layout { flex-direction: column; }
-    .detail-panel { position: static; max-height: none; }
     .bar-chart { min-width: 600px; }
-    .bar-label { font-size: 10px; transform: none; }
-    .bar-value { font-size: 10px; }
-    .bar-item { width: 32px; }
-    .gauge-fill { font-size: 10px; }
-    .gauge-ticker { font-size: 12px; }
     .stock-row .ticker { font-size: 13px; }
     .stock-row .price { font-size: 12px; }
     .stock-row .change { font-size: 11px; }
-    .chart-title { font-size: 11px; }
-    .summary-card .value { font-size: 16px; }
     .header h1 { font-size: 18px; }
-    .tabs { flex-direction: column; }
-    .tab-btn { width: 100%; }
-  }
-
-  @media (max-width: 480px) {
-    .bar-chart { min-width: 600px; }
-    .bar-label { font-size: 10px; transform: none; }
-    .bar-value { font-size: 10px; }
-    .bar-item { width: 32px; }
-    .gauge-fill { font-size: 10px; }
-    .gauge-ticker { font-size: 12px; }
-    .stock-row .ticker { font-size: 13px; }
-    .stock-row .price { font-size: 12px; }
-    .stock-row .change { font-size: 11px; }
-    .chart-title { font-size: 11px; }
-    .summary-card .value { font-size: 16px; }
-    .header h1 { font-size: 18px; }
-    .detail-panel { width: 100%; }
-    .detail-card { padding: 16px; }
   }
 </style>
 </head>
@@ -175,7 +138,7 @@
 </div>
 
 <div class="header">
-  <h1>📊 S&P 500 — תנודות גדולות + מניות לפני פריצה + הזדמנויות</h1>
+  <h1>S&P 500 — תנודות גדולות + מניות לפני פריצה + הזדמנויות</h1>
   <div class="subtitle">נתונים חיים · דירוגי אנליסטים · ניתוח טכני · מתעדכן כל דקה</div>
 </div>
 
@@ -183,9 +146,9 @@
   <div class="status-pill"><div class="pulse" id="marketPulse"></div><span id="marketStatus"></span></div>
   <div class="status-pill">🕐 <span id="lastUpdate">--</span></div>
   <div class="status-pill">⏱️ עדכון הבא: <span id="nextUpdate">--</span></div>
+  <div class="status-pill data-source-pill" id="dataSourcePill">מקור: ---</div>
 </div>
 
-<!-- Tab Navigation -->
 <div class="tabs">
   <button class="tab-btn active" onclick="switchTab('movers')">📈 תנודות גדולות</button>
   <button class="tab-btn" onclick="switchTab('breakout')">🚀 מניות לפני פריצה</button>
@@ -196,48 +159,33 @@
 <div class="tab-content active" id="tab-movers">
   <div class="summary-cards" id="summaryCards"></div>
   <div class="chart-container">
-    <div class="chart-title">שינוי באחוזים — כל 20 המניות (מתעדכן כל דקה)</div>
+    <div class="chart-title">שינוי באחוזים — כל 20 המניות</div>
     <div class="bar-chart" id="barChart"></div>
   </div>
   <div class="filters" id="filters"></div>
-  <div class="main-layout">
-    <div class="stock-list" id="stockList"></div>
-    <div class="detail-panel" id="detailPanel" style="display:none"></div>
-  </div>
+  <div class="stock-list" id="stockList"></div>
 </div>
 
 <!-- TAB 2: BREAKOUTS -->
 <div class="tab-content" id="tab-breakout">
   <div class="summary-cards" id="breakoutSummary"></div>
-
   <div class="breakout-gauge" id="breakoutGauge">
-    <div class="chart-title">קרבה ל-52 Week High — ככל שהבר מלא יותר, המניה קרובה יותר לפריצה</div>
+    <div class="chart-title">קרבה ל-52 Week High</div>
   </div>
-
   <div class="filters" id="breakoutFilters"></div>
-
-  <div class="main-layout">
-    <div class="stock-list" id="breakoutList"></div>
-    <div class="detail-panel" id="breakoutDetail" style="display:none"></div>
-  </div>
+  <div class="stock-list" id="breakoutList"></div>
 </div>
 
 <!-- TAB 3: OPPORTUNITIES -->
 <div class="tab-content" id="tab-opportunities">
   <div class="summary-cards" id="opportunitySummary"></div>
-
   <div class="filters" id="opportunityFilters"></div>
-
-  <div class="main-layout">
-    <div class="stock-list" id="opportunityList"></div>
-    <div class="detail-panel" id="opportunityDetail" style="display:none"></div>
-  </div>
+  <div class="stock-list" id="opportunityList"></div>
 </div>
 
 <div class="disclaimer">
   ⚠️ <strong>הבהרה חשובה:</strong> המידע המוצג הוא לצרכי מידע בלבד ואינו מהווה ייעוץ השקעות.
-  פריצה טכנית (Breakout) אינה ערובה לעליית מחיר. לפני כל החלטת השקעה, יש להתייעץ עם יועץ השקעות מוסמך.
-  המחירים עשויים להיות מעוכבים עד 15 דקות.
+  המחירים עשויים להיות מעוכבים. לפני כל החלטת השקעה, יש להתייעץ עם יועץ מוסמך.
 </div>
 
 <script>
@@ -246,25 +194,19 @@ const MOVERS_TICKERS = [
   "SBAC","LITE","CIEN","SATS","INTC","CCI","COHR","DASH","GLW","LYB",
   "SWKS","VRSN","TSLA","GE","SWK","CCL","BIIB","GM","PKG","ARES","DVA","PPG","UAL","RCL"
 ];
-
-// Breakout candidates: stocks at/near 52-week highs + strong momentum
 const BREAKOUT_TICKERS = [
   "TJX","PFE","EQIX","ROST","SRE","CTVA","ETR","CASY",
   "SBAC","CCI","DASH","COHR","LITE","VRSN","GLW"
 ];
-
-// Opportunity tickers: Large-cap stocks + major ETFs
 const OPPORTUNITY_TICKERS = [
-  // Large-cap stocks
   "AAPL","MSFT","AMZN","GOOGL","META","NVDA","TSLA","JPM","BAC","GS",
   "WMT","HD","UNH","JNJ","V","MA","PG","KO","PEP","XOM",
   "CVX","CRM","ORCL","NFLX","AMD","AVGO","MU","QCOM",
-  // Major ETFs
   "SPY","QQQ","IWM","DIA","XLF","XLE","XLK","ARKK","SOXL","TLT","HYG","GLD","SLV","EEM","VXX"
 ];
-
 const ALL_TICKERS = [...new Set([...MOVERS_TICKERS, ...BREAKOUT_TICKERS, ...OPPORTUNITY_TICKERS])];
 const REFRESH_INTERVAL = 60000;
+let dataSource = "---";
 
 const analystData = {
   SBAC:{rating:"Buy",analysts:17,strongBuy:24,buy:24,hold:53,sell:0,signal:"buy",sector:"REITs"},
@@ -366,81 +308,20 @@ const companyNames = {
 };
 
 const recentAnalystUpdates = {
-  TJX: [
-    {analyst: "Goldman Sachs", action: "העלה מחיר יעד", target: "$160", date: "היום"},
-    {analyst: "Morgan Stanley", action: "חזר על דירוג Overweight", target: "$155", date: "היום"}
-  ],
-  PFE: [
-    {analyst: "JP Morgan", action: "העלה דירוג ל-Buy", target: "$34", date: "היום"},
-    {analyst: "Bank of America", action: "חזר על Neutral", target: "$31", date: "אתמול"}
-  ],
-  EQIX: [
-    {analyst: "Barclays", action: "העלה מחיר יעד", target: "$1,020", date: "היום"},
-    {analyst: "Deutsche Bank", action: "חזר על Buy", target: "$990", date: "היום"}
-  ],
-  ROST: [
-    {analyst: "Wells Fargo", action: "העלה מחיר יעד", target: "$185", date: "היום"},
-    {analyst: "Citigroup", action: "חזר על Buy", target: "$180", date: "אתמול"}
-  ],
-  SRE: [
-    {analyst: "UBS", action: "חזר על Buy", target: "$105", date: "היום"},
-    {analyst: "Raymond James", action: "העלה דירוג", target: "$108", date: "אתמול"}
-  ],
-  CTVA: [
-    {analyst: "Jefferies", action: "העלה מחיר יעד", target: "$78", date: "היום"},
-    {analyst: "Stifel", action: "חזר על Buy", target: "$76", date: "אתמול"}
-  ],
-  ETR: [
-    {analyst: "Mizuho", action: "העלה מחיר יעד", target: "$98", date: "היום"},
-    {analyst: "BMO", action: "חזר על Outperform", target: "$95", date: "אתמול"}
-  ],
-  CASY: [
-    {analyst: "RBC Capital", action: "העלה מחיר יעד", target: "$780", date: "היום"},
-    {analyst: "Truist", action: "חזר על Buy", target: "$770", date: "אתמול"}
-  ],
-  SBAC: [
-    {analyst: "KeyBanc", action: "העלה דירוג ל-Overweight", target: "$230", date: "היום"},
-    {analyst: "Cowen", action: "חזר על Outperform", target: "$225", date: "אתמול"}
-  ],
-  CCI: [
-    {analyst: "TD Securities", action: "העלה מחיר יעד", target: "$95", date: "היום"},
-    {analyst: "BTIG", action: "חזר על Buy", target: "$92", date: "אתמול"}
-  ],
-  DASH: [
-    {analyst: "Oppenheimer", action: "חזר על Outperform", target: "$185", date: "היום"},
-    {analyst: "Piper Sandler", action: "העלה מחיר יעד", target: "$180", date: "היום"}
-  ],
-  COHR: [
-    {analyst: "Needham", action: "העלה מחיר יעד", target: "$290", date: "היום"},
-    {analyst: "Craig-Hallum", action: "חזר על Buy", target: "$280", date: "אתמול"}
-  ],
-  LITE: [
-    {analyst: "B. Riley", action: "העלה מחיר יעד", target: "$900", date: "היום"},
-    {analyst: "Northland Capital", action: "חזר על Outperform", target: "$875", date: "אתמול"}
-  ],
-  VRSN: [
-    {analyst: "Baird", action: "חזר על Outperform", target: "$280", date: "היום"},
-    {analyst: "Evercore ISI", action: "העלה מחיר יעד", target: "$275", date: "אתמול"}
-  ],
-  GLW: [
-    {analyst: "Loop Capital", action: "העלה מחיר יעד", target: "$165", date: "היום"},
-    {analyst: "Susquehanna", action: "חזר על Positive", target: "$160", date: "אתמול"}
-  ]
+  TJX:[{analyst:"Goldman Sachs",action:"העלה מחיר יעד",target:"$160",date:"היום"},{analyst:"Morgan Stanley",action:"חזר על Overweight",target:"$155",date:"היום"}],
+  PFE:[{analyst:"JP Morgan",action:"העלה דירוג ל-Buy",target:"$34",date:"היום"},{analyst:"Bank of America",action:"חזר על Neutral",target:"$31",date:"אתמול"}],
+  EQIX:[{analyst:"Barclays",action:"העלה מחיר יעד",target:"$1,020",date:"היום"},{analyst:"Deutsche Bank",action:"חזר על Buy",target:"$990",date:"היום"}],
+  SBAC:[{analyst:"KeyBanc",action:"העלה דירוג ל-Overweight",target:"$230",date:"היום"},{analyst:"Cowen",action:"חזר על Outperform",target:"$225",date:"אתמול"}],
+  DASH:[{analyst:"Oppenheimer",action:"חזר על Outperform",target:"$185",date:"היום"},{analyst:"Piper Sandler",action:"העלה מחיר יעד",target:"$180",date:"היום"}],
+  TSLA:[{analyst:"Morgan Stanley",action:"חזר על Overweight",target:"$430",date:"היום"},{analyst:"Wedbush",action:"העלה מחיר יעד",target:"$400",date:"אתמול"}],
+  NVDA:[{analyst:"KeyBanc",action:"העלה מחיר יעד",target:"$180",date:"היום"},{analyst:"Bank of America",action:"חזר על Buy",target:"$165",date:"אתמול"}],
 };
 
 // ===================== STATE =====================
-let stocks = [];
-let breakoutStocks = [];
-let opportunities = [];
-let allQuotes = {};
-let selectedTicker = null;
-let selectedBreakout = null;
-let selectedOpportunity = null;
-let activeFilter = "all";
-let breakoutFilter = "all";
-let opportunityFilter = "all";
-let activeTab = "movers";
-let secondsUntilRefresh = 60;
+let stocks = [], breakoutStocks = [], opportunities = [], allQuotes = {};
+let selectedTicker = null, selectedBreakout = null, selectedOpportunity = null;
+let activeFilter = "all", breakoutFilter = "all", opportunityFilter = "all";
+let activeTab = "movers", secondsUntilRefresh = 60;
 
 // ===================== MARKET HOURS =====================
 function getMarketState() {
@@ -455,85 +336,95 @@ function getMarketState() {
 }
 function shouldAutoRefresh() { const ms=getMarketState(); return ms.state==="open"||ms.state==="pre"||ms.state==="after"; }
 
-// ===================== OPPORTUNITY DETECTION =====================
-function detectOpportunities(quotes) {
-  opportunities = [];
-  const now = new Date();
-  const et = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
-  const h = et.getHours(), m = et.getMinutes();
-  const minutes = h * 60 + m;
-
-  // Market open: 9:30-10:30 ET (570-630)
-  // Last hour before close: 15:00-16:00 ET (900-960)
-  const isMarketOpen = minutes >= 570 && minutes <= 630;
-  const isLastHour = minutes >= 900 && minutes <= 960;
-  const relevantTime = isMarketOpen || isLastHour;
-
-  for (const ticker of OPPORTUNITY_TICKERS) {
-    const q = quotes[ticker];
-    if (!q) continue;
-
-    const volRatio = q.avgVolume > 0 ? q.volume / q.avgVolume : 1;
-
-    // Flag unusual volume: > 2x average daily volume
-    if (volRatio > 2.0 && relevantTime) {
-      const abnormalVolume = Math.max(0, q.volume - q.avgVolume);
-      const abnormalDollarAmount = abnormalVolume * q.price;
-
-      // Determine direction: positive change = likely long, negative = likely short
-      const direction = q.change >= 0 ? "long" : "short";
-      const directionEmoji = q.change >= 0 ? "🟢" : "🔴";
-
-      const timing = isMarketOpen ? "פתיחת השוק" : "שעה אחרונה";
-
-      opportunities.push({
-        ticker: q.ticker,
-        name: q.name,
-        price: q.price,
-        change: q.change,
-        volume: q.volume,
-        avgVolume: q.avgVolume,
-        volRatio: volRatio,
-        abnormalDollarAmount: abnormalDollarAmount,
-        direction: direction,
-        directionEmoji: directionEmoji,
-        timing: timing,
-        isMarketOpen: isMarketOpen,
-        sector: q.sector || "Other"
-      });
-    }
-  }
-
-  // Sort by abnormal dollar amount descending
-  opportunities.sort((a, b) => b.abnormalDollarAmount - a.abnormalDollarAmount);
-}
-
 // ===================== DATA FETCHING =====================
 function fetchWithTimeout(url, ms=8000) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), ms);
   return fetch(url, {signal: c.signal}).finally(() => clearTimeout(t));
 }
-async function fetchAllData() {
+
+// --- CNBC Data Source ---
+async function fetchFromCNBC() {
+  const symbols = ALL_TICKERS.join("|");
+  const url = `https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=${symbols}&requestMethod=itv&noCache=${Date.now()}&partnerId=2&fund=1&exthrs=1&output=json&fields=symbol,last,change,change_pct,open,high,low,volume,previous_day_closing,FundamentalData`;
+  const proxies = [
+    `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  ];
+  for (const proxyUrl of proxies) {
+    try {
+      const r = await fetchWithTimeout(proxyUrl, 10000);
+      if (!r.ok) continue;
+      const d = await r.json();
+      const quotes = d?.FormattedQuoteResult?.FormattedQuote;
+      if (quotes && quotes.length > 0) {
+        dataSource = "CNBC";
+        return quotes.map(q => ({
+          symbol: q.symbol,
+          regularMarketPrice: parseFloat(q.last) || 0,
+          regularMarketChangePercent: parseFloat(q.change_pct) || 0,
+          regularMarketChange: parseFloat(q.change) || 0,
+          regularMarketPreviousClose: parseFloat(q.previous_day_closing) || 0,
+          fiftyTwoWeekHigh: parseFloat(q.FundamentalData?.yrhiprice) || parseFloat(q.high) || 0,
+          fiftyTwoWeekLow: parseFloat(q.FundamentalData?.yrloprice) || parseFloat(q.low) || 0,
+          regularMarketVolume: parseInt(q.volume) || 0,
+          averageDailyVolume3Month: parseInt(q.FundamentalData?.avedailyvolume) || 0,
+          shortName: q.name || q.symbol,
+          _source: "cnbc"
+        }));
+      }
+    } catch(e) { console.log("CNBC proxy fail:", e.message); }
+  }
+  return null;
+}
+
+// --- Yahoo Finance Data Source ---
+async function fetchFromYahoo() {
   const symbols = ALL_TICKERS.join(",");
   const fields = "regularMarketPrice,regularMarketChangePercent,regularMarketChange,regularMarketPreviousClose,preMarketPrice,preMarketChangePercent,fiftyTwoWeekHigh,fiftyTwoWeekLow,regularMarketVolume,averageDailyVolume3Month,shortName";
-  const endpoints = [
+  const urls = [
     `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=${fields}`,
     `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&fields=${fields}`,
   ];
-  for (const url of endpoints) {
+  // Try direct first
+  for (const url of urls) {
     try {
       const r = await fetchWithTimeout(url, 8000);
       if (!r.ok) continue;
       const d = await r.json();
-      if (d.quoteResponse && d.quoteResponse.result) return d.quoteResponse.result;
-    } catch(e) { console.log("API fail:", e.message); }
+      if (d.quoteResponse && d.quoteResponse.result && d.quoteResponse.result.length > 0) {
+        dataSource = "Yahoo Finance";
+        return d.quoteResponse.result;
+      }
+    } catch(e) { console.log("Yahoo direct fail:", e.message); }
   }
-  try {
-    const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(endpoints[0])}`;
-    const r = await fetchWithTimeout(proxy, 8000);
-    if (r.ok) { const d = await r.json(); if (d.quoteResponse&&d.quoteResponse.result) return d.quoteResponse.result; }
-  } catch(e) { console.log("Proxy fail:", e.message); }
+  // Try via CORS proxies
+  const proxies = [
+    `https://corsproxy.io/?url=${encodeURIComponent(urls[0])}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(urls[0])}`,
+  ];
+  for (const proxyUrl of proxies) {
+    try {
+      const r = await fetchWithTimeout(proxyUrl, 10000);
+      if (!r.ok) continue;
+      const d = await r.json();
+      if (d.quoteResponse && d.quoteResponse.result && d.quoteResponse.result.length > 0) {
+        dataSource = "Yahoo Finance (proxy)";
+        return d.quoteResponse.result;
+      }
+    } catch(e) { console.log("Yahoo proxy fail:", e.message); }
+  }
+  return null;
+}
+
+// --- Combined fetch: try CNBC first, then Yahoo ---
+async function fetchAllData() {
+  // Try CNBC first (user preference)
+  let results = await fetchFromCNBC();
+  if (results && results.length > 5) return results;
+  // Fallback to Yahoo
+  results = await fetchFromYahoo();
+  if (results && results.length > 5) return results;
   return null;
 }
 
@@ -553,81 +444,103 @@ function processData(results) {
       ...(analystData[t]||{sector:"Other",signal:"hold",rating:"N/A",analysts:0,strongBuy:0,buy:0,hold:100,sell:0}),
     };
   }
-
-  // Process movers
   stocks = MOVERS_TICKERS.filter(t=>allQuotes[t]).map(t=>allQuotes[t])
     .sort((a,b)=>Math.abs(b.change)-Math.abs(a.change)).slice(0,20);
-
-  // Process breakouts — calculate proximity to 52-week high
   breakoutStocks = BREAKOUT_TICKERS.filter(t=>allQuotes[t]).map(t=>{
-    const q = allQuotes[t];
-    const range = q.high52 - q.low52;
-    const proximity = range > 0 ? ((q.price - q.low52) / range) * 100 : 0;
-    const distFromHigh = q.high52 > 0 ? ((q.high52 - q.price) / q.high52) * 100 : 0;
-    const volRatio = q.avgVolume > 0 ? q.volume / q.avgVolume : 1;
-
-    let breakoutStatus, statusClass, statusLabel;
-    if (distFromHigh <= 1) { breakoutStatus="broke"; statusClass="broke"; statusLabel="🔥 פרצה!"; }
-    else if (distFromHigh <= 5) { breakoutStatus="near"; statusClass="near"; statusLabel="⚡ לפני פריצה"; }
-    else { breakoutStatus="approaching"; statusClass="approaching"; statusLabel="📡 מתקרבת"; }
-
-    return { ...q, proximity, distFromHigh, volRatio, breakoutStatus, statusClass, statusLabel };
-  }).sort((a,b) => a.distFromHigh - b.distFromHigh);
-
-  // Detect opportunities
+    const q=allQuotes[t], range=q.high52-q.low52;
+    const proximity=range>0?((q.price-q.low52)/range)*100:0;
+    const distFromHigh=q.high52>0?((q.high52-q.price)/q.high52)*100:0;
+    const volRatio=q.avgVolume>0?q.volume/q.avgVolume:1;
+    let breakoutStatus,statusClass,statusLabel;
+    if(distFromHigh<=1){breakoutStatus="broke";statusClass="broke";statusLabel="🔥 פרצה!";}
+    else if(distFromHigh<=5){breakoutStatus="near";statusClass="near";statusLabel="⚡ לפני פריצה";}
+    else{breakoutStatus="approaching";statusClass="approaching";statusLabel="📡 מתקרבת";}
+    return {...q,proximity,distFromHigh,volRatio,breakoutStatus,statusClass,statusLabel};
+  }).sort((a,b)=>a.distFromHigh-b.distFromHigh);
   detectOpportunities(allQuotes);
+}
+
+// ===================== OPPORTUNITY DETECTION =====================
+function detectOpportunities(quotes) {
+  opportunities = [];
+  const now = new Date();
+  const et = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  const minutes = et.getHours()*60 + et.getMinutes();
+  const isMarketOpen = minutes>=570 && minutes<=630;
+  const isLastHour = minutes>=900 && minutes<=960;
+  const relevantTime = isMarketOpen || isLastHour;
+  for (const ticker of OPPORTUNITY_TICKERS) {
+    const q = quotes[ticker]; if (!q) continue;
+    const volRatio = q.avgVolume > 0 ? q.volume / q.avgVolume : 1;
+    if (volRatio > 2.0 && relevantTime) {
+      const abnormalVolume = Math.max(0, q.volume - q.avgVolume);
+      const abnormalDollarAmount = abnormalVolume * q.price;
+      const direction = q.change >= 0 ? "long" : "short";
+      opportunities.push({ ticker:q.ticker, name:q.name, price:q.price, change:q.change,
+        volume:q.volume, avgVolume:q.avgVolume, volRatio, abnormalDollarAmount, direction,
+        directionEmoji: direction==="long"?"🟢":"🔴", timing: isMarketOpen?"פתיחת השוק":"שעה אחרונה",
+        isMarketOpen, sector:q.sector||"Other" });
+    }
+  }
+  opportunities.sort((a,b)=>b.abnormalDollarAmount-a.abnormalDollarAmount);
 }
 
 // ===================== FALLBACK DATA =====================
 function loadFallback() {
+  dataSource = "נתוני גיבוי (אופליין)";
   const fb = {
-    SBAC:{p:204.04,c:18.93,h:210,l:130}, LITE:{p:826.88,c:8.14,h:850,l:500}, CIEN:{p:447.76,c:7.79,h:460,l:280},
-    SATS:{p:128.68,c:6.70,h:135,l:60}, INTC:{p:50.38,c:4.89,h:55,l:28}, CCI:{p:84.78,c:4.89,h:88,l:60},
-    COHR:{p:258.16,c:4.18,h:270,l:120}, DASH:{p:156.45,c:3.95,h:165,l:95}, GLW:{p:147.92,c:3.89,h:155,l:90},
-    LYB:{p:79.60,c:3.77,h:95,l:65}, SWKS:{p:55.19,c:3.70,h:68,l:42}, VRSN:{p:259.85,c:3.62,h:268,l:180},
-    TSLA:{p:360.59,c:-5.42,h:490,l:220}, GE:{p:281.16,c:-3.94,h:340,l:195}, SWK:{p:68.64,c:-3.56,h:92,l:60},
-    CCL:{p:25.64,c:-3.54,h:32,l:16}, BIIB:{p:177.34,c:-3.50,h:225,l:140}, GM:{p:72.54,c:-3.33,h:88,l:48},
-    PKG:{p:204.46,c:-3.22,h:238,l:170}, ARES:{p:102.43,c:-3.19,h:128,l:78}, DVA:{p:145.58,c:-3.17,h:172,l:108},
-    PPG:{p:103.24,c:-3.03,h:132,l:95}, UAL:{p:92.21,c:-3.02,h:118,l:58}, RCL:{p:273.59,c:-3.00,h:310,l:180},
-    TJX:{p:146.50,c:1.50,h:148,l:109}, PFE:{p:29.80,c:1.70,h:30.20,l:24.80},
-    EQIX:{p:948.00,c:1.60,h:960,l:758}, ROST:{p:171.50,c:1.50,h:173,l:99},
-    SRE:{p:96.80,c:0.20,h:97.50,l:69}, CTVA:{p:72.10,c:0.10,h:72.80,l:53.60},
-    ETR:{p:90.50,c:1.10,h:91.80,l:67}, CASY:{p:746.00,c:2.10,h:747,l:380},
-    AAPL:{p:245.50,c:2.30,h:250,l:190}, MSFT:{p:428.60,c:1.80,h:435,l:370},
-    AMZN:{p:195.40,c:1.50,h:200,l:160}, GOOGL:{p:142.80,c:1.20,h:145,l:125},
-    META:{p:518.50,c:2.10,h:530,l:450}, NVDA:{p:142.50,c:3.20,h:150,l:110},
-    JPM:{p:223.40,c:1.10,h:228,l:180}, BAC:{p:42.80,c:0.90,h:44,l:38},
-    GS:{p:505.60,c:0.50,h:510,l:440}, WMT:{p:98.30,c:1.30,h:100,l:82},
-    HD:{p:426.50,c:1.60,h:435,l:360}, UNH:{p:560.40,c:2.20,h:570,l:460},
-    JNJ:{p:162.30,c:0.80,h:165,l:145}, V:{p:297.80,c:1.40,h:305,l:260},
-    MA:{p:524.60,c:2.10,h:535,l:450}, PG:{p:170.20,c:0.60,h:172,l:150},
-    KO:{p:70.50,c:-0.30,h:72,l:63}, PEP:{p:208.40,c:0.40,h:210,l:190},
-    XOM:{p:115.30,c:1.10,h:120,l:100}, CVX:{p:168.50,c:1.50,h:172,l:148},
-    CRM:{p:322.80,c:1.80,h:330,l:280}, ORCL:{p:192.60,c:1.50,h:200,l:168},
-    NFLX:{p:285.50,c:2.40,h:295,l:240}, AMD:{p:195.80,c:2.60,h:205,l:160},
-    AVGO:{p:305.40,c:1.30,h:315,l:265}, MU:{p:118.60,c:1.80,h:125,l:100},
-    QCOM:{p:205.30,c:1.40,h:215,l:180},
-    SPY:{p:580.50,c:1.20,h:590,l:520}, QQQ:{p:478.30,c:1.80,h:490,l:420},
-    IWM:{p:210.40,c:0.90,h:215,l:190}, DIA:{p:410.60,c:1.10,h:420,l:385},
-    XLF:{p:45.20,c:0.80,h:46,l:40}, XLE:{p:98.30,c:1.50,h:100,l:88},
-    XLK:{p:192.50,c:1.60,h:198,l:170}, ARKK:{p:68.40,c:2.10,h:70,l:58},
-    SOXL:{p:52.30,c:3.20,h:55,l:42}, TLT:{p:98.50,c:-0.50,h:100,l:85},
-    HYG:{p:103.20,c:0.40,h:105,l:95}, GLD:{p:212.80,c:0.30,h:215,l:200},
-    SLV:{p:31.50,c:0.80,h:32,l:28}, EEM:{p:42.80,c:1.10,h:44,l:38},
-    VXX:{p:18.50,c:-2.10,h:22,l:15},
+    SBAC:{p:204.04,c:18.93,h:210,l:130,v:2800000,av:1500000}, LITE:{p:826.88,c:8.14,h:850,l:500,v:1200000,av:800000},
+    CIEN:{p:447.76,c:7.79,h:460,l:280,v:900000,av:600000}, SATS:{p:128.68,c:6.70,h:135,l:60,v:400000,av:250000},
+    INTC:{p:50.38,c:4.89,h:55,l:28,v:35000000,av:28000000}, CCI:{p:84.78,c:4.89,h:88,l:60,v:3200000,av:2400000},
+    COHR:{p:258.16,c:4.18,h:270,l:120,v:800000,av:500000}, DASH:{p:156.45,c:3.95,h:165,l:95,v:5500000,av:4000000},
+    GLW:{p:147.92,c:3.89,h:155,l:90,v:2100000,av:1800000}, LYB:{p:79.60,c:3.77,h:95,l:65,v:1800000,av:1500000},
+    SWKS:{p:55.19,c:3.70,h:68,l:42,v:2500000,av:2000000}, VRSN:{p:259.85,c:3.62,h:268,l:180,v:600000,av:500000},
+    TSLA:{p:360.59,c:-5.42,h:490,l:220,v:85000000,av:65000000}, GE:{p:281.16,c:-3.94,h:340,l:195,v:4500000,av:3800000},
+    SWK:{p:68.64,c:-3.56,h:92,l:60,v:1100000,av:900000}, CCL:{p:25.64,c:-3.54,h:32,l:16,v:18000000,av:14000000},
+    BIIB:{p:177.34,c:-3.50,h:225,l:140,v:1500000,av:1200000}, GM:{p:72.54,c:-3.33,h:88,l:48,v:8000000,av:6500000},
+    PKG:{p:204.46,c:-3.22,h:238,l:170,v:500000,av:400000}, ARES:{p:102.43,c:-3.19,h:128,l:78,v:1200000,av:950000},
+    DVA:{p:145.58,c:-3.17,h:172,l:108,v:400000,av:350000}, PPG:{p:103.24,c:-3.03,h:132,l:95,v:1300000,av:1100000},
+    UAL:{p:92.21,c:-3.02,h:118,l:58,v:6200000,av:5000000}, RCL:{p:273.59,c:-3.00,h:310,l:180,v:2800000,av:2300000},
+    TJX:{p:146.50,c:1.50,h:148,l:109,v:3500000,av:3000000}, PFE:{p:29.80,c:1.70,h:30.20,l:24.80,v:25000000,av:20000000},
+    EQIX:{p:948.00,c:1.60,h:960,l:758,v:600000,av:500000}, ROST:{p:171.50,c:1.50,h:173,l:99,v:1800000,av:1500000},
+    SRE:{p:96.80,c:0.20,h:97.50,l:69,v:1200000,av:1000000}, CTVA:{p:72.10,c:0.10,h:72.80,l:53.60,v:2800000,av:2500000},
+    ETR:{p:90.50,c:1.10,h:91.80,l:67,v:800000,av:700000}, CASY:{p:746.00,c:2.10,h:747,l:380,v:200000,av:180000},
+    AAPL:{p:245.50,c:2.30,h:250,l:190,v:52000000,av:45000000}, MSFT:{p:428.60,c:1.80,h:435,l:370,v:18000000,av:15000000},
+    AMZN:{p:195.40,c:1.50,h:200,l:160,v:35000000,av:30000000}, GOOGL:{p:142.80,c:1.20,h:145,l:125,v:22000000,av:18000000},
+    META:{p:518.50,c:2.10,h:530,l:450,v:14000000,av:12000000}, NVDA:{p:142.50,c:3.20,h:150,l:110,v:45000000,av:35000000},
+    JPM:{p:223.40,c:1.10,h:228,l:180,v:8000000,av:7000000}, BAC:{p:42.80,c:0.90,h:44,l:38,v:32000000,av:28000000},
+    GS:{p:505.60,c:0.50,h:510,l:440,v:2200000,av:2000000}, WMT:{p:98.30,c:1.30,h:100,l:82,v:6000000,av:5000000},
+    HD:{p:426.50,c:1.60,h:435,l:360,v:3200000,av:2800000}, UNH:{p:560.40,c:2.20,h:570,l:460,v:2800000,av:2500000},
+    JNJ:{p:162.30,c:0.80,h:165,l:145,v:5500000,av:5000000}, V:{p:297.80,c:1.40,h:305,l:260,v:5000000,av:4500000},
+    MA:{p:524.60,c:2.10,h:535,l:450,v:2800000,av:2500000}, PG:{p:170.20,c:0.60,h:172,l:150,v:4800000,av:4200000},
+    KO:{p:70.50,c:-0.30,h:72,l:63,v:10000000,av:9000000}, PEP:{p:208.40,c:0.40,h:210,l:190,v:3500000,av:3200000},
+    XOM:{p:115.30,c:1.10,h:120,l:100,v:12000000,av:10000000}, CVX:{p:168.50,c:1.50,h:172,l:148,v:6000000,av:5500000},
+    CRM:{p:322.80,c:1.80,h:330,l:280,v:4200000,av:3800000}, ORCL:{p:192.60,c:1.50,h:200,l:168,v:6000000,av:5500000},
+    NFLX:{p:285.50,c:2.40,h:295,l:240,v:5500000,av:4800000}, AMD:{p:195.80,c:2.60,h:205,l:160,v:42000000,av:35000000},
+    AVGO:{p:305.40,c:1.30,h:315,l:265,v:3200000,av:2800000}, MU:{p:118.60,c:1.80,h:125,l:100,v:15000000,av:13000000},
+    QCOM:{p:205.30,c:1.40,h:215,l:180,v:5800000,av:5000000},
+    SPY:{p:580.50,c:1.20,h:590,l:520,v:60000000,av:55000000}, QQQ:{p:478.30,c:1.80,h:490,l:420,v:35000000,av:30000000},
+    IWM:{p:210.40,c:0.90,h:215,l:190,v:22000000,av:20000000}, DIA:{p:410.60,c:1.10,h:420,l:385,v:3000000,av:2500000},
+    XLF:{p:45.20,c:0.80,h:46,l:40,v:28000000,av:25000000}, XLE:{p:98.30,c:1.50,h:100,l:88,v:12000000,av:10000000},
+    XLK:{p:192.50,c:1.60,h:198,l:170,v:5500000,av:5000000}, ARKK:{p:68.40,c:2.10,h:70,l:58,v:18000000,av:15000000},
+    SOXL:{p:52.30,c:3.20,h:55,l:42,v:45000000,av:38000000}, TLT:{p:98.50,c:-0.50,h:100,l:85,v:15000000,av:13000000},
+    HYG:{p:103.20,c:0.40,h:105,l:95,v:8000000,av:7000000}, GLD:{p:212.80,c:0.30,h:215,l:200,v:6000000,av:5500000},
+    SLV:{p:31.50,c:0.80,h:32,l:28,v:22000000,av:18000000}, EEM:{p:42.80,c:1.10,h:44,l:38,v:28000000,av:25000000},
+    VXX:{p:18.50,c:-2.10,h:22,l:15,v:35000000,av:30000000},
   };
   allQuotes = {};
   for (const [t,d] of Object.entries(fb)) {
     allQuotes[t] = {
       ticker:t, name:companyNames[t]||t, price:d.p, change:d.c,
-      type:d.c>=0?"gainer":"decliner", high52:d.h, low52:d.l, volume:0, avgVolume:0,
+      type:d.c>=0?"gainer":"decliner", high52:d.h, low52:d.l,
+      volume:d.v||0, avgVolume:d.av||0,
       ...(analystData[t]||{sector:"Other",signal:"hold",rating:"N/A",analysts:0,strongBuy:0,buy:0,hold:100,sell:0}),
     };
   }
   stocks = MOVERS_TICKERS.filter(t=>allQuotes[t]).map(t=>allQuotes[t])
     .sort((a,b)=>Math.abs(b.change)-Math.abs(a.change)).slice(0,20);
   breakoutStocks = BREAKOUT_TICKERS.filter(t=>allQuotes[t]).map(t=>{
-    const q=allQuotes[t]; const range=q.high52-q.low52;
+    const q=allQuotes[t],range=q.high52-q.low52;
     const proximity=range>0?((q.price-q.low52)/range)*100:0;
     const distFromHigh=q.high52>0?((q.high52-q.price)/q.high52)*100:0;
     let breakoutStatus,statusClass,statusLabel;
@@ -639,10 +552,11 @@ function loadFallback() {
   detectOpportunities(allQuotes);
 }
 
-// ===================== RENDERING: TABS =====================
+// ===================== HELPERS =====================
 const signalColors = {strongBuy:"#00c853",buy:"#4caf50",hold:"#ff9800",sell:"#f44336"};
 const signalLabels = {strongBuy:"קנייה חזקה",buy:"קנייה",hold:"החזקה",sell:"מכירה"};
 const signalEmoji = {strongBuy:"🟢🟢",buy:"🟢",hold:"🟡",sell:"🔴"};
+function fmtVol(v) { return v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':'N/A'; }
 
 window.switchTab = function(tab) {
   activeTab = tab;
@@ -652,9 +566,113 @@ window.switchTab = function(tab) {
   document.getElementById('tab-opportunities').classList.toggle('active', tab==='opportunities');
 };
 
+// ===================== INLINE DETAIL BUILDER =====================
+function buildStockDetail(s) {
+  const chC=s.change>=0?"#69f0ae":"#ff5252";
+  const sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡";
+  const rats=[{l:"קנייה חזקה",v:s.strongBuy,c:"#00c853"},{l:"קנייה",v:s.buy,c:"#4caf50"},{l:"החזקה",v:s.hold,c:"#ff9800"},{l:"מכירה",v:s.sell,c:"#f44336"}];
+  const updates = recentAnalystUpdates[s.ticker]||[];
+  let ib,it;
+  if(s.signal==="strongBuy"){ib="rgba(76,175,80,0.15)";it="✅ רוב האנליסטים ממליצים על קנייה חזקה.";}
+  else if(s.signal==="buy"){ib="rgba(76,175,80,0.12)";it="🟢 רוב האנליסטים ממליצים על קנייה.";}
+  else if(s.signal==="hold"){ib="rgba(255,152,0,0.12)";it="🟡 הדעות חלוקות. מומלץ לבחון לעומק.";}
+  else{ib="rgba(244,67,54,0.12)";it="🔴 רוב האנליסטים ממליצים למכור.";}
+
+  return `<div class="inline-detail-inner">
+    <div class="market-data-grid">
+      <div class="market-data-item"><div class="label">מחיר</div><div class="value">$${s.price.toFixed(2)}</div></div>
+      <div class="market-data-item"><div class="label">שינוי</div><div class="value" style="color:${chC}">${s.change>=0?'+':''}${s.change.toFixed(2)}%</div></div>
+      <div class="market-data-item"><div class="label">נפח מסחר</div><div class="value">${fmtVol(s.volume)}</div></div>
+      <div class="market-data-item"><div class="label">נפח ממוצע</div><div class="value">${fmtVol(s.avgVolume)}</div></div>
+      <div class="market-data-item"><div class="label">52W High</div><div class="value">$${s.high52>0?s.high52.toFixed(2):'N/A'}</div></div>
+      <div class="market-data-item"><div class="label">52W Low</div><div class="value">$${s.low52>0?s.low52.toFixed(2):'N/A'}</div></div>
+    </div>
+    <div style="text-align:center;margin:8px 0">
+      <span class="signal-badge" style="background:${sc};padding:5px 14px;font-size:12px">${se} ${sl}</span>
+      <div style="font-size:9px;opacity:0.4;margin-top:4px">${s.analysts} אנליסטים</div>
+    </div>
+    <div style="margin-bottom:8px">
+      ${rats.map(r=>`<div class="rating-row"><div class="rl">${r.l}</div><div class="rb"><div class="rf" style="width:${r.v}%;background:${r.c}"></div></div><div class="rv">${r.v}%</div></div>`).join("")}
+    </div>
+    ${updates.length>0?`<div style="margin-top:8px"><div style="font-size:10px;font-weight:700;opacity:0.7;margin-bottom:6px;text-align:center">📊 עדכוני אנליסטים</div>${updates.map(u=>`<div class="analyst-update-card"><div class="analyst-name">${u.analyst}</div><div class="analyst-action">${u.action}</div><div class="analyst-target">יעד: ${u.target}</div></div>`).join('')}</div>`:''}
+    <div class="insight-box" style="background:${ib}">${it}</div>
+  </div>`;
+}
+
+function buildBreakoutDetail(s) {
+  const chC=s.change>=0?"#69f0ae":"#ff5252";
+  const sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡";
+  const rats=[{l:"קנייה חזקה",v:s.strongBuy,c:"#00c853"},{l:"קנייה",v:s.buy,c:"#4caf50"},{l:"החזקה",v:s.hold,c:"#ff9800"},{l:"מכירה",v:s.sell,c:"#f44336"}];
+  const distAmount = s.high52 - s.price;
+  const updates = recentAnalystUpdates[s.ticker]||[];
+
+  let bInsight="";
+  if(s.breakoutStatus==="broke") bInsight=`<div class="insight-box" style="background:rgba(0,200,83,0.15)">🔥 <strong>המניה פרצה את שיא ה-52 שבועות!</strong><br>המחיר במרחק ${s.distFromHigh.toFixed(2)}% מהשיא. מומנטום חיובי.</div>`;
+  else if(s.breakoutStatus==="near") bInsight=`<div class="insight-box" style="background:rgba(255,152,0,0.15)">⚡ <strong>לפני פריצה — ${s.distFromHigh.toFixed(2)}% מתחת לשיא</strong><br>שיא: $${s.high52.toFixed(2)}. פריצה מעליו עשויה ליצור מומנטום.</div>`;
+  else bInsight=`<div class="insight-box" style="background:rgba(33,150,243,0.15)">📡 <strong>מתקרבת — ${s.distFromHigh.toFixed(2)}% מהשיא</strong><br>שיא: $${s.high52.toFixed(2)} | שפל: $${s.low52.toFixed(2)}</div>`;
+
+  return `<div class="inline-detail-inner">
+    <div class="market-data-grid">
+      <div class="market-data-item"><div class="label">מחיר</div><div class="value">$${s.price.toFixed(2)}</div></div>
+      <div class="market-data-item"><div class="label">שינוי</div><div class="value" style="color:${chC}">${s.change>=0?'+':''}${s.change.toFixed(2)}%</div></div>
+      <div class="market-data-item"><div class="label">נפח מסחר</div><div class="value">${fmtVol(s.volume)}</div></div>
+      <div class="market-data-item"><div class="label">נפח ממוצע</div><div class="value">${fmtVol(s.avgVolume)}</div></div>
+      <div class="market-data-item"><div class="label">52W High</div><div class="value">$${s.high52.toFixed(2)}</div></div>
+      <div class="market-data-item"><div class="label">52W Low</div><div class="value">$${s.low52.toFixed(2)}</div></div>
+    </div>
+    <div style="text-align:center;margin:8px 0">
+      <span class="breakout-status ${s.statusClass}" style="padding:5px 16px;font-size:13px">${s.statusLabel}</span>
+    </div>
+    <div class="breakout-point-section">
+      <div class="breakout-point-title">🎯 נקודת פריצה</div>
+      <div class="breakout-point-info">שיא 52 שבועות: $${s.high52.toFixed(2)}</div>
+      <div class="breakout-distance-bar"><div class="breakout-distance-fill" style="width:${Math.max(100-s.distFromHigh,0)}%"></div></div>
+      <div class="breakout-distance-text">מרחק: $${distAmount.toFixed(2)} (${s.distFromHigh.toFixed(2)}%)</div>
+    </div>
+    <div style="text-align:center;margin:8px 0">
+      <span class="signal-badge" style="background:${sc};padding:4px 12px;font-size:11px">${se} ${sl}</span>
+      <div style="font-size:9px;opacity:0.4;margin-top:3px">${s.analysts} אנליסטים</div>
+    </div>
+    <div style="margin-bottom:8px">${rats.map(r=>`<div class="rating-row"><div class="rl">${r.l}</div><div class="rb"><div class="rf" style="width:${r.v}%;background:${r.c}"></div></div><div class="rv">${r.v}%</div></div>`).join('')}</div>
+    ${updates.length>0?`<div style="margin-top:8px"><div style="font-size:10px;font-weight:700;opacity:0.7;margin-bottom:6px;text-align:center">📊 עדכוני אנליסטים</div>${updates.map(u=>`<div class="analyst-update-card"><div class="analyst-name">${u.analyst}</div><div class="analyst-action">${u.action}</div><div class="analyst-target">יעד: ${u.target}</div></div>`).join('')}</div>`:''}
+    ${bInsight}
+  </div>`;
+}
+
+function buildOpportunityDetail(o) {
+  const chC=o.change>=0?"#69f0ae":"#ff5252";
+  const timingDesc = o.isMarketOpen?"פתיחת השוק (9:30-10:30 ET) — זמן קריטי":"שעה אחרונה (15:00-16:00 ET) — סיום יום מסחר";
+  let insight = o.direction==="long"
+    ?`<div class="insight-box" style="background:rgba(76,175,80,0.15)">🟢 <strong>אות קנייה</strong> — נפח חריג ${o.volRatio.toFixed(1)}x. משקיעים גדולים כנראה קונים ~$${(o.abnormalDollarAmount/1e6).toFixed(1)}M.</div>`
+    :`<div class="insight-box" style="background:rgba(244,67,54,0.15)">🔴 <strong>אות מכירה</strong> — נפח חריג ${o.volRatio.toFixed(1)}x. משקיעים גדולים כנראה מוכרים ~$${(o.abnormalDollarAmount/1e6).toFixed(1)}M.</div>`;
+
+  return `<div class="inline-detail-inner">
+    <div class="market-data-grid">
+      <div class="market-data-item"><div class="label">מחיר</div><div class="value">$${o.price.toFixed(2)}</div></div>
+      <div class="market-data-item"><div class="label">שינוי</div><div class="value" style="color:${chC}">${o.change>=0?'+':''}${o.change.toFixed(2)}%</div></div>
+      <div class="market-data-item"><div class="label">נפח מסחר</div><div class="value">${fmtVol(o.volume)}</div></div>
+      <div class="market-data-item"><div class="label">נפח ממוצע</div><div class="value">${fmtVol(o.avgVolume)}</div></div>
+      <div class="market-data-item"><div class="label">יחס נפח</div><div class="value">${o.volRatio.toFixed(2)}x</div></div>
+      <div class="market-data-item"><div class="label">סקטור</div><div class="value" style="font-size:10px">${o.sector}</div></div>
+    </div>
+    <div style="text-align:center;margin:8px 0">
+      <span class="${o.direction==='long'?'opp-direction-long':'opp-direction-short'}" style="font-size:13px">${o.directionEmoji} ${o.direction==='long'?'אות קנייה':'אות מכירה'}</span>
+    </div>
+    <div class="breakout-point-section">
+      <div class="breakout-point-title">💰 גודל תנועה חריגה</div>
+      <div class="breakout-point-info">$${(o.abnormalDollarAmount/1e6).toFixed(1)}M</div>
+    </div>
+    <div class="breakout-point-section" style="margin-top:6px">
+      <div class="breakout-point-title">⏰ תזמון</div>
+      <div class="breakout-point-info">${o.timing}</div>
+      <div style="font-size:9px;opacity:0.6;text-align:center">${timingDesc}</div>
+    </div>
+    ${insight}
+  </div>`;
+}
+
 // ===================== RENDERING: MOVERS =====================
 function renderMovers() {
-  // Summary
   const gainers=stocks.filter(s=>s.change>0).length, decliners=stocks.filter(s=>s.change<0).length;
   const buySignals=stocks.filter(s=>s.signal==="buy"||s.signal==="strongBuy").length;
   const topM=stocks.reduce((a,b)=>Math.abs(a.change)>Math.abs(b.change)?a:b,stocks[0]);
@@ -663,48 +681,40 @@ function renderMovers() {
     {e:"🟢",v:buySignals,l:"אות קנייה",c:"#4caf50"},{e:"🔥",v:topM?topM.ticker:"--",l:"התנודה הגדולה",c:"#ffd740"},
   ].map(c=>`<div class="summary-card"><div class="emoji">${c.e}</div><div class="value" style="color:${c.c}">${c.v}</div><div class="label">${c.l}</div></div>`).join("");
 
-  // Chart
   const sorted=[...stocks].sort((a,b)=>b.change-a.change);
   const maxAbs=Math.max(...sorted.map(s=>Math.abs(s.change)),1);
   document.getElementById("barChart").innerHTML=sorted.map(s=>{
-    const h=Math.max((Math.abs(s.change)/maxAbs)*120,4), cls=s.change>=0?"positive":"negative";
+    const h=Math.max((Math.abs(s.change)/maxAbs)*120,4),cls=s.change>=0?"positive":"negative";
     return `<div class="bar-item"><div class="bar-value" style="color:${s.change>=0?'#69f0ae':'#ff5252'}">${s.change>=0?'+':''}${s.change.toFixed(1)}%</div><div class="bar ${cls}" style="height:${h}px"></div><div class="bar-label">${s.ticker}</div></div>`;
   }).join("");
 
-  // Filters
   const fs=[{k:"all",l:"🔄 הכל"},{k:"gainers",l:"📈 עולות"},{k:"decliners",l:"📉 יורדות"},{k:"buySignal",l:"🟢 אות קנייה"}];
   document.getElementById("filters").innerHTML=fs.map(f=>`<button class="filter-btn ${activeFilter===f.k?'active':''}" onclick="setFilter('${f.k}')">${f.l}</button>`).join("");
 
-  // List
   let filtered=[...stocks];
   if(activeFilter==="gainers")filtered=filtered.filter(s=>s.change>0);
   else if(activeFilter==="decliners")filtered=filtered.filter(s=>s.change<0);
   else if(activeFilter==="buySignal")filtered=filtered.filter(s=>s.signal==="buy"||s.signal==="strongBuy");
   filtered.sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
 
-  document.getElementById("stockList").innerHTML=filtered.map(s=>{
-    const chC=s.change>=0?"up":"down",ar=s.change>=0?"▲":"▼",sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡",sel=selectedTicker===s.ticker?"selected":"";
+  let html = '';
+  for (const s of filtered) {
+    const chC=s.change>=0?"up":"down",ar=s.change>=0?"▲":"▼";
+    const sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡";
+    const sel=selectedTicker===s.ticker?"selected":"";
     const bar=[{p:s.strongBuy,c:"#00c853"},{p:s.buy,c:"#4caf50"},{p:s.hold,c:"#ff9800"},{p:s.sell,c:"#f44336"}].filter(x=>x.p>0).map(x=>`<div style="width:${x.p}%;background:${x.c}"></div>`).join("");
-    return `<div class="stock-row ${sel}" onclick="selectStock('${s.ticker}')"><div><div class="ticker">${s.ticker}</div><div class="sector-tag">${s.sector}</div></div><div class="name" style="flex:1">${s.name}<div class="analyst-bar">${bar}</div></div><div class="price">$${s.price.toFixed(2)}</div><div class="change ${chC}">${ar} ${Math.abs(s.change).toFixed(2)}%</div><span class="signal-badge" style="background:${sc}">${se} ${sl}</span></div>`;
-  }).join("");
-
-  renderMoversDetail();
-}
-
-function renderMoversDetail() {
-  const panel=document.getElementById("detailPanel");
-  if(!selectedTicker){panel.style.display="none";return;}
-  const s=stocks.find(x=>x.ticker===selectedTicker);
-  if(!s){panel.style.display="none";return;}
-  panel.style.display="block";
-  const chC=s.change>=0?"#69f0ae":"#ff5252",sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡";
-  const rats=[{l:"קנייה חזקה",v:s.strongBuy,c:"#00c853"},{l:"קנייה",v:s.buy,c:"#4caf50"},{l:"החזקה",v:s.hold,c:"#ff9800"},{l:"מכירה",v:s.sell,c:"#f44336"}];
-  let ib,it;
-  if(s.signal==="strongBuy"){ib="rgba(76,175,80,0.15)";it="✅ רוב האנליסטים ממליצים על קנייה חזקה.";}
-  else if(s.signal==="buy"){ib="rgba(76,175,80,0.12)";it="🟢 רוב האנליסטים ממליצים על קנייה.";}
-  else if(s.signal==="hold"){ib="rgba(255,152,0,0.12)";it="🟡 הדעות חלוקות. מומלץ לבחון לעומק.";}
-  else{ib="rgba(244,67,54,0.12)";it="🔴 רוב האנליסטים ממליצים למכור.";}
-  panel.innerHTML=`<div class="detail-card"><div class="dt">${s.ticker}</div><div class="dn">${s.name} · ${s.sector}</div><div class="detail-stats"><div><div class="val" style="color:#fff">$${s.price.toFixed(2)}</div><div class="lbl">מחיר</div></div><div><div class="val" style="color:${chC}">${s.change>=0?'+':''}${s.change.toFixed(2)}%</div><div class="lbl">שינוי</div></div></div><div style="text-align:center;margin-bottom:12px"><span class="signal-badge" style="background:${sc};padding:5px 14px;font-size:12px">${se} ${sl}</span><div style="font-size:9px;opacity:0.4;margin-top:4px">${s.analysts} אנליסטים</div></div><div style="margin-bottom:12px"><div style="font-size:10px;opacity:0.5;text-align:center;margin-bottom:6px">פילוח דירוגי אנליסטים</div>${rats.map(r=>`<div class="rating-row"><div class="rl">${r.l}</div><div class="rb"><div class="rf" style="width:${r.v}%;background:${r.c}"></div></div><div class="rv">${r.v}%</div></div>`).join("")}</div><div class="insight-box" style="background:${ib}">${it}</div></div>`;
+    html += `<div class="stock-row ${sel}" onclick="selectStock('${s.ticker}')">
+      <div><div class="ticker">${s.ticker}</div><div class="sector-tag">${s.sector}</div></div>
+      <div class="name" style="flex:1">${s.name}<div class="analyst-bar">${bar}</div></div>
+      <div class="price">$${s.price.toFixed(2)}</div>
+      <div class="change ${chC}">${ar} ${Math.abs(s.change).toFixed(2)}%</div>
+      <span class="signal-badge" style="background:${sc}">${se} ${sl}</span>
+    </div>`;
+    // Inline detail right after the row
+    const isOpen = selectedTicker===s.ticker;
+    html += `<div class="inline-detail ${isOpen?'open':''}" id="detail-mover-${s.ticker}">${isOpen?buildStockDetail(s):''}</div>`;
+  }
+  document.getElementById("stockList").innerHTML = html;
 }
 
 // ===================== RENDERING: BREAKOUTS =====================
@@ -712,169 +722,62 @@ function renderBreakouts() {
   const broke=breakoutStocks.filter(s=>s.breakoutStatus==="broke").length;
   const near=breakoutStocks.filter(s=>s.breakoutStatus==="near").length;
   const approaching=breakoutStocks.filter(s=>s.breakoutStatus==="approaching").length;
-
   document.getElementById("breakoutSummary").innerHTML=[
     {e:"🔥",v:broke,l:"פרצו!",c:"#00c853"},{e:"⚡",v:near,l:"לפני פריצה",c:"#ff9800"},
     {e:"📡",v:approaching,l:"מתקרבות",c:"#2196f3"},{e:"📊",v:breakoutStocks.length,l:"במעקב",c:"#64b5f6"},
   ].map(c=>`<div class="summary-card"><div class="emoji">${c.e}</div><div class="value" style="color:${c.c}">${c.v}</div><div class="label">${c.l}</div></div>`).join("");
 
-  // Gauge chart
   const gaugeHtml = breakoutStocks.slice(0,15).map(s=>{
-    const pct = Math.min(s.proximity, 100);
-    let col = s.breakoutStatus==="broke"?"#00c853":s.breakoutStatus==="near"?"#ff9800":"#2196f3";
+    const pct=Math.min(s.proximity,100);
+    let col=s.breakoutStatus==="broke"?"#00c853":s.breakoutStatus==="near"?"#ff9800":"#2196f3";
     return `<div class="gauge-row"><div class="gauge-ticker">${s.ticker}</div><div class="gauge-bar"><div class="gauge-fill" style="width:${pct}%;background:${col};">${s.distFromHigh.toFixed(1)}%</div></div><span class="breakout-status ${s.statusClass}" style="font-size:9px">${s.statusLabel}</span></div>`;
   }).join("");
-  document.getElementById("breakoutGauge").innerHTML=`<div class="chart-title">קרבה ל-52 Week High — מרחק מהשיא באחוזים (ככל שקטן יותר = קרוב יותר לפריצה)</div>${gaugeHtml}`;
+  document.getElementById("breakoutGauge").innerHTML=`<div class="chart-title">קרבה ל-52 Week High — מרחק מהשיא באחוזים</div>${gaugeHtml}`;
 
-  // Filters
   const bfs=[{k:"all",l:"🔄 הכל"},{k:"broke",l:"🔥 פרצו"},{k:"near",l:"⚡ לפני פריצה"},{k:"approaching",l:"📡 מתקרבות"}];
   document.getElementById("breakoutFilters").innerHTML=bfs.map(f=>`<button class="filter-btn ${breakoutFilter===f.k?'active':''}" onclick="setBreakoutFilter('${f.k}')">${f.l}</button>`).join("");
 
-  // List
   let filtered=[...breakoutStocks];
   if(breakoutFilter!=="all")filtered=filtered.filter(s=>s.breakoutStatus===breakoutFilter);
 
-  document.getElementById("breakoutList").innerHTML=filtered.map(s=>{
+  let html = '';
+  for (const s of filtered) {
     const chC=s.change>=0?"up":"down",ar=s.change>=0?"▲":"▼",sel=selectedBreakout===s.ticker?"selected":"";
-    return `<div class="stock-row ${sel}" onclick="selectBreakout('${s.ticker}')"><div><div class="ticker">${s.ticker}</div><div class="sector-tag">${s.sector}</div></div><div class="name" style="flex:1">${s.name}<div class="proximity-bar"><div class="proximity-fill" style="width:${Math.min(s.proximity,100)}%;background:${s.statusClass==='broke'?'#00c853':s.statusClass==='near'?'#ff9800':'#2196f3'}"></div></div></div><div class="price">$${s.price.toFixed(2)}</div><div class="change ${chC}">${ar} ${Math.abs(s.change).toFixed(2)}%</div><span class="breakout-status ${s.statusClass}">${s.statusLabel}</span></div>`;
-  }).join("");
-
-  renderBreakoutDetail();
-}
-
-function renderBreakoutDetail() {
-  const panel=document.getElementById("breakoutDetail");
-  if(!selectedBreakout){panel.style.display="none";return;}
-  const s=breakoutStocks.find(x=>x.ticker===selectedBreakout);
-  if(!s){panel.style.display="none";return;}
-  panel.style.display="block";
-
-  const chC=s.change>=0?"#69f0ae":"#ff5252";
-  const sc=signalColors[s.signal]||"#ff9800",sl=signalLabels[s.signal]||"החזקה",se=signalEmoji[s.signal]||"🟡";
-  const rats=[{l:"קנייה חזקה",v:s.strongBuy,c:"#00c853"},{l:"קנייה",v:s.buy,c:"#4caf50"},{l:"החזקה",v:s.hold,c:"#ff9800"},{l:"מכירה",v:s.sell,c:"#f44336"}];
-
-  // Market data section
-  const marketDataHtml = `
-    <div class="market-data-grid">
-      <div class="market-data-item">
-        <div class="label">מחיר נוכחי</div>
-        <div class="value">$${s.price.toFixed(2)}</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">שינוי יומי</div>
-        <div class="value" style="color:${chC}">${s.change>=0?'+':''}${s.change.toFixed(2)}%</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">נפח</div>
-        <div class="value">${s.volume>1000000?(s.volume/1000000).toFixed(1)+'M':'N/A'}</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">נפח ממוצע</div>
-        <div class="value">${s.avgVolume>1000000?(s.avgVolume/1000000).toFixed(1)+'M':'N/A'}</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">52W High</div>
-        <div class="value">$${s.high52.toFixed(2)}</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">52W Low</div>
-        <div class="value">$${s.low52.toFixed(2)}</div>
-      </div>
-    </div>
-  `;
-
-  // Breakout point section
-  const distAmount = s.high52 - s.price;
-  const breakoutPointHtml = `
-    <div class="breakout-point-section">
-      <div class="breakout-point-title">🎯 נקודת פריצה (Breakout Point)</div>
-      <div class="breakout-point-info">שיא 52 שבועות: $${s.high52.toFixed(2)}</div>
-      <div class="breakout-distance-bar">
-        <div class="breakout-distance-fill" style="width:${Math.max(100-s.distFromHigh,0)}%"></div>
-        <div class="breakout-distance-marker" style="right:${Math.max(s.distFromHigh,0)}%"></div>
-      </div>
-      <div class="breakout-distance-text">
-        מרחק: $${distAmount.toFixed(2)} (${s.distFromHigh.toFixed(2)}%) מהפריצה
-      </div>
-    </div>
-  `;
-
-  // Analyst updates section
-  const updates = recentAnalystUpdates[s.ticker] || [];
-  const analystUpdatesHtml = updates.length > 0 ? `
-    <div class="analyst-updates-section">
-      <div class="analyst-updates-title">📊 עדכוני אנליסטים (24 שעות אחרונות)</div>
-      ${updates.map(u => `
-        <div class="analyst-update-card">
-          <div class="analyst-name">${u.analyst}</div>
-          <div class="analyst-action">${u.action}</div>
-          <div class="analyst-target">יעד: ${u.target}</div>
-          <div class="analyst-date">${u.date}</div>
-        </div>
-      `).join('')}
-    </div>
-  ` : '';
-
-  let breakoutInsight = "";
-  if(s.breakoutStatus==="broke") breakoutInsight=`<div class="insight-box" style="background:rgba(0,200,83,0.15)">🔥 <strong>המניה פרצה את שיא ה-52 שבועות!</strong><br>המחיר נמצא במרחק של ${s.distFromHigh.toFixed(2)}% מהשיא ($${s.high52.toFixed(2)}).<br>פריצה כזו מלווה לעתים קרובות בהמשך מומנטום חיובי.</div>`;
-  else if(s.breakoutStatus==="near") breakoutInsight=`<div class="insight-box" style="background:rgba(255,152,0,0.15)">⚡ <strong>לפני פריצה — ${s.distFromHigh.toFixed(2)}% מתחת לשיא</strong><br>שיא 52 שבועות: $${s.high52.toFixed(2)}<br>המניה מתקרבת לרמת ההתנגדות. פריצה מעל השיא עשויה ליצור מומנטום.</div>`;
-  else breakoutInsight=`<div class="insight-box" style="background:rgba(33,150,243,0.15)">📡 <strong>מתקרבת — ${s.distFromHigh.toFixed(2)}% מתחת לשיא</strong><br>שיא 52 שבועות: $${s.high52.toFixed(2)} | שפל: $${s.low52.toFixed(2)}<br>המניה במגמת עלייה אבל עדיין לא קרובה מספיק לפריצה.</div>`;
-
-  panel.innerHTML=`<div class="detail-card">
-    <div class="dt">${s.ticker}</div>
-    <div class="dn">${s.name} · ${s.sector}</div>
-
-    ${marketDataHtml}
-
-    <div style="text-align:center;margin-bottom:12px">
-      <span class="breakout-status ${s.statusClass}" style="padding:5px 16px;font-size:13px">${s.statusLabel}</span>
-    </div>
-
-    ${breakoutPointHtml}
-
-    <div style="text-align:center;margin-bottom:12px">
-      <span class="signal-badge" style="background:${sc};padding:4px 12px;font-size:11px">${se} ${sl}</span>
-      <div style="font-size:9px;opacity:0.4;margin-top:3px">${s.analysts} אנליסטים</div>
-    </div>
-
-    <div style="margin-bottom:10px">
-      ${rats.map(r=>`<div class="rating-row"><div class="rl">${r.l}</div><div class="rb"><div class="rf" style="width:${r.v}%;background:${r.c}"></div></div><div class="rv">${r.v}%</div></div>`).join('')}
-    </div>
-
-    ${analystUpdatesHtml}
-
-    ${breakoutInsight}
-  </div>`;
+    html += `<div class="stock-row ${sel}" onclick="selectBreakout('${s.ticker}')">
+      <div><div class="ticker">${s.ticker}</div><div class="sector-tag">${s.sector}</div></div>
+      <div class="name" style="flex:1">${s.name}<div class="proximity-bar"><div class="proximity-fill" style="width:${Math.min(s.proximity,100)}%;background:${s.statusClass==='broke'?'#00c853':s.statusClass==='near'?'#ff9800':'#2196f3'}"></div></div></div>
+      <div class="price">$${s.price.toFixed(2)}</div>
+      <div class="change ${chC}">${ar} ${Math.abs(s.change).toFixed(2)}%</div>
+      <span class="breakout-status ${s.statusClass}">${s.statusLabel}</span>
+    </div>`;
+    const isOpen = selectedBreakout===s.ticker;
+    html += `<div class="inline-detail ${isOpen?'open':''}" id="detail-breakout-${s.ticker}">${isOpen?buildBreakoutDetail(s):''}</div>`;
+  }
+  document.getElementById("breakoutList").innerHTML = html;
 }
 
 // ===================== RENDERING: OPPORTUNITIES =====================
 function renderOpportunities() {
-  // Summary
-  const total = opportunities.length;
-  const longs = opportunities.filter(o => o.direction === "long").length;
-  const shorts = opportunities.filter(o => o.direction === "short").length;
-  const biggest = opportunities.length > 0 ? opportunities[0] : null;
-
+  const total=opportunities.length, longs=opportunities.filter(o=>o.direction==="long").length, shorts=opportunities.filter(o=>o.direction==="short").length;
+  const biggest=opportunities.length>0?opportunities[0]:null;
   document.getElementById("opportunitySummary").innerHTML=[
-    {e:"💰",v:total,l:"הזדמנויות",c:"#ffd740"},
-    {e:"🟢",v:longs,l:"אותות קנייה",c:"#69f0ae"},
+    {e:"💰",v:total,l:"הזדמנויות",c:"#ffd740"},{e:"🟢",v:longs,l:"אותות קנייה",c:"#69f0ae"},
     {e:"🔴",v:shorts,l:"אותות מכירה",c:"#ff5252"},
-    {e:"📊",v:biggest?`$${(biggest.abnormalDollarAmount/1000000).toFixed(1)}M`:"--",l:"קנייה הגדולה",c:"#ffc107"},
+    {e:"📊",v:biggest?`$${(biggest.abnormalDollarAmount/1e6).toFixed(1)}M`:"--",l:"קנייה הגדולה",c:"#ffc107"},
   ].map(c=>`<div class="summary-card"><div class="emoji">${c.e}</div><div class="value" style="color:${c.c}">${c.v}</div><div class="label">${c.l}</div></div>`).join("");
 
-  // Filters
   const fs=[{k:"all",l:"🔄 הכל"},{k:"long",l:"🟢 קנייה"},{k:"short",l:"🔴 מכירה"},{k:"marketOpen",l:"📍 פתיחה"}];
   document.getElementById("opportunityFilters").innerHTML=fs.map(f=>`<button class="filter-btn ${opportunityFilter===f.k?'active':''}" onclick="setOpportunityFilter('${f.k}')">${f.l}</button>`).join("");
 
-  // List
   let filtered=[...opportunities];
   if(opportunityFilter==="long")filtered=filtered.filter(o=>o.direction==="long");
   else if(opportunityFilter==="short")filtered=filtered.filter(o=>o.direction==="short");
   else if(opportunityFilter==="marketOpen")filtered=filtered.filter(o=>o.isMarketOpen);
 
-  document.getElementById("opportunityList").innerHTML=filtered.map(o=>{
-    const sel = selectedOpportunity===o.ticker?"selected":"";
-    return `<div class="opportunity-card ${sel}" onclick="selectOpportunity('${o.ticker}')">
+  let html = '';
+  for (const o of filtered) {
+    const sel=selectedOpportunity===o.ticker?"selected":"";
+    html += `<div class="opportunity-card ${sel}" onclick="selectOpportunity('${o.ticker}')">
       <div class="opportunity-header">
         <div class="opportunity-ticker">${o.ticker}</div>
         <div class="opportunity-name">${o.name}</div>
@@ -884,100 +787,11 @@ function renderOpportunities() {
         <span class="opp-time-badge">${o.timing}</span>
         <span class="${o.direction==='long'?'opp-direction-long':'opp-direction-short'}">${o.directionEmoji} ${o.direction==='long'?'קנייה':'מכירה'}</span>
       </div>
-      <div class="opp-detail-grid">
-        <div class="opp-detail-item">
-          <div class="label">מחיר</div>
-          <div class="value">$${o.price.toFixed(2)}</div>
-        </div>
-        <div class="opp-detail-item">
-          <div class="label">שינוי</div>
-          <div class="value" style="color:${o.change>=0?'#69f0ae':'#ff5252'}">${o.change>=0?'+':''}${o.change.toFixed(2)}%</div>
-        </div>
-      </div>
-      <div style="margin-top:8px">
-        <div class="opportunity-amount">💵 $${(o.abnormalDollarAmount/1000000).toFixed(1)}M</div>
-        <div style="font-size:8px;opacity:0.5;margin-top:2px">קנייה/מכירה חריגה</div>
-      </div>
     </div>`;
-  }).join("");
-
-  renderOpportunityDetail();
-}
-
-function renderOpportunityDetail() {
-  const panel=document.getElementById("opportunityDetail");
-  if(!selectedOpportunity){panel.style.display="none";return;}
-  const o=opportunities.find(x=>x.ticker===selectedOpportunity);
-  if(!o){panel.style.display="none";return;}
-  panel.style.display="block";
-
-  const chC=o.change>=0?"#69f0ae":"#ff5252";
-  const volAmount = o.volume > 1000000 ? (o.volume/1000000).toFixed(1)+'M' : (o.volume/1000).toFixed(0)+'K';
-  const avgVolAmount = o.avgVolume > 1000000 ? (o.avgVolume/1000000).toFixed(1)+'M' : (o.avgVolume/1000).toFixed(0)+'K';
-
-  let insight = "";
-  if(o.direction === "long") {
-    insight = `<div class="insight-box" style="background:rgba(76,175,80,0.15)">🟢 <strong>אות קנייה חזקה</strong><br>נפח חריג של ${o.volRatio.toFixed(1)}x מהממוצע ברגע זה בשוק.<br>כנראה שמעורבים משקיעים גדולים בקנייה של כ-$${(o.abnormalDollarAmount/1000000).toFixed(1)}M של ${o.ticker}.</div>`;
-  } else {
-    insight = `<div class="insight-box" style="background:rgba(244,67,54,0.15)">🔴 <strong>אות מכירה חזקה</strong><br>נפח חריג של ${o.volRatio.toFixed(1)}x מהממוצע ברגע זה בשוק.<br>כנראה שמעורבים משקיעים גדולים במכירה של כ-$${(o.abnormalDollarAmount/1000000).toFixed(1)}M של ${o.ticker}.</div>`;
+    const isOpen = selectedOpportunity===o.ticker;
+    html += `<div class="inline-detail ${isOpen?'open':''}" id="detail-opp-${o.ticker}">${isOpen?buildOpportunityDetail(o):''}</div>`;
   }
-
-  const timingDesc = o.isMarketOpen ? "בשעת פתיחת השוק (9:30-10:30 ET) — זמן קריטי לתנועות משמעותיות" : "בשעה האחרונה לפני סגירת השוק (15:00-16:00 ET) — סיום יום מסחר משמעותי";
-
-  panel.innerHTML=`<div class="detail-card">
-    <div class="dt">${o.ticker}</div>
-    <div class="dn">${o.name}</div>
-
-    <div class="market-data-grid">
-      <div class="market-data-item">
-        <div class="label">מחיר</div>
-        <div class="value">$${o.price.toFixed(2)}</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">שינוי</div>
-        <div class="value" style="color:${chC}">${o.change>=0?'+':''}${o.change.toFixed(2)}%</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">נפח נוכחי</div>
-        <div class="value">${volAmount}</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">ממוצע יומי</div>
-        <div class="value">${avgVolAmount}</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">יחס נפח</div>
-        <div class="value">${o.volRatio.toFixed(2)}x</div>
-      </div>
-      <div class="market-data-item">
-        <div class="label">סקטור</div>
-        <div class="value">${o.sector}</div>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin-bottom:12px;margin-top:12px">
-      <span class="${o.direction==='long'?'opp-direction-long':'opp-direction-short'}" style="font-size:13px">${o.directionEmoji} ${o.direction==='long'?'אות קנייה':'אות מכירה'}</span>
-    </div>
-
-    <div class="breakout-point-section">
-      <div class="breakout-point-title">💰 הערכת גודל התנועה</div>
-      <div class="breakout-point-info">$${(o.abnormalDollarAmount/1000000).toFixed(1)}M</div>
-      <div style="font-size:9px;opacity:0.6;text-align:center;margin-top:6px">נפח לא-ממוצע בדולרים</div>
-    </div>
-
-    <div class="breakout-point-section" style="margin-top:8px">
-      <div class="breakout-point-title">⏰ זמן המעקב</div>
-      <div class="breakout-point-info">${o.timing}</div>
-      <div style="font-size:9px;opacity:0.6;text-align:center;margin-top:6px">${timingDesc}</div>
-    </div>
-
-    ${insight}
-
-    <div class="insight-box" style="background:rgba(255,152,0,0.1);margin-top:12px;font-size:9px;opacity:0.7">
-      ⚠️ <strong>חשוב:</strong> תנועות נפח חריגות עלולות להצביע על קנייה/מכירה של משקיעים גדולים, אבל לא תמיד זה מובטח.
-      עלייה בנפח יכולה גם להיות תוצאה של נדודי בעלים רגילים או תנודות שוק. מומלץ לבדוק יותר מידע טכני ובשוק לפני קבלת החלטות.
-    </div>
-  </div>`;
+  document.getElementById("opportunityList").innerHTML = html;
 }
 
 // ===================== INTERACTIONS =====================
@@ -993,6 +807,7 @@ function updateMarketStatus() {
   const ms=getMarketState();
   document.getElementById("marketPulse").className=`pulse ${ms.class}`;
   document.getElementById("marketStatus").textContent=ms.label;
+  document.getElementById("dataSourcePill").textContent=`מקור: ${dataSource}`;
 }
 function updateTimers() {
   document.getElementById("lastUpdate").textContent=new Date().toLocaleTimeString("he-IL");
